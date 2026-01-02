@@ -1,0 +1,27 @@
+{%extends 'layout/layout.html'%}
+{%block content%}
+
+<div>
+<h2>URLS</h2>
+
+<table>
+    <tr>
+        <th>No:</th>
+        <th>Original url</th>
+        <th>short url</th>
+        <th>actions</th>
+    </tr>
+    {%for url in urls%}
+    <tr>
+        <td>{{url.id}}</td>
+        <td>{{url.original_url}}</td>
+        <td>{{url.short_code}}</td>
+        <td>
+            <button>Edit</button>
+            <button>Delete</button>
+        </td>
+    </tr>
+    {%endfor%}
+</table>
+</div>
+{%endblock%}

@@ -55,3 +55,11 @@ def create_short_url(request):
         messages.success(request,"Successfully shortened the URL")
         return render(request,"create.html")
     return render(request,"create.html")
+
+
+
+def list_url(request):
+    urls = ShortURL.objects.all().order_by("-created_at")
+    return render(request,"list.html",{"urls":urls})
+
+
