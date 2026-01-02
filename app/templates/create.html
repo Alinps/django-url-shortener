@@ -1,0 +1,17 @@
+{%extends 'layout/layout.html'%}
+{%block content%}
+<div class="d-flex just">
+<div class="card">
+    <div class="card-body">
+        <form method = "POST">
+            {% csrf_token %}
+            <input type="text" name="original_url" placeholder="Enter the URL" class="form-controll">
+            <button type="submit" class="btn btn-primary-outline">Shorten</button>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+    
+{%endblock%}
+    

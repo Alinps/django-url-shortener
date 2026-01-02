@@ -10,7 +10,7 @@
    
      {% if messages %}
         <script>
-            {% for message in messages%}
+            {% for message in messages% }
                 alert("{{message|escapejs}}");
             {%endfor%}
         </script>

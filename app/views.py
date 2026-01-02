@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
+from .utils import short_code_generator
+from .models import ShortURL
 # Create your views here.
 def register(request):
     if request.method=='POST':
@@ -38,3 +40,18 @@ def logout_user(request):
         'user':request.user
     }
     return render(request,'logout.html',{'context':context})
+
+
+
+def create_short_url(request):
+    if request.method=='POST':
+        original_url = request.POST.get("original_url")
+        short_code=short_code_generator()
+        print(short_code)
+        ShortURL.objects.create(
+            original_url=original_url,
+            short_code=short_code
+        )
+        messages.success(request,"Successfully shortened the URL")
+        return render(request,"create.html")
+    return render(request,"create.html")

@@ -5,5 +5,6 @@ urlpatterns = [
     
     path('',views.register),
     path("login/",views.login_user,name='login'),
-    path('logout/',views.logout_user,name='logout')
+    path('logout/',views.logout_user,name='logout'),
+    path('create/',views.create_short_url,name='create')
 ]
