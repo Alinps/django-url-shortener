@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
@@ -63,3 +63,21 @@ def list_url(request):
     return render(request,"list.html",{"urls":urls})
 
 
+
+def update_url(request,id):
+    url_obj=get_object_or_404(ShortURL,id=id)
+    if request.method=="POST":
+        new_url=request.POST.get("original_url")
+        url_obj.original_url=new_url
+        url_obj.save()
+        return redirect("list")
+    return render(request,"edit.html",{"url":url_obj})
+
+
+def delete_url(request,id):
+    url_obj=get_object_or_404(ShortURL,id=id)
+    if request.method=='POST':
+        url_obj.delete()
+        return redirect("list")
+    return render(request,"delete.html",{'url':url_obj})
+        

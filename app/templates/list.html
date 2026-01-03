@@ -17,8 +17,8 @@
         <td>{{url.original_url}}</td>
         <td>{{url.short_code}}</td>
         <td>
-            <button>Edit</button>
-            <button>Delete</button>
+            <a href="{%url 'update' url.id%}" class="btn btn-primary" type="submit">Edit</a>
+            <a href="{%url 'delete' url.id%}" class="btn btn-danger" type="submit">Delete</a>
         </td>
     </tr>
     {%endfor%}
