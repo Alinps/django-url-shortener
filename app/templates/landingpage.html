@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {%load static%}
+  <meta charset="UTF-8" />
+  <title>Shortly — Smart URL Shortener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{%static 'css/landingpage.css'%}">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo">🔗 Shortly</div>
+    <div class="nav-actions">
+      <!-- <a href="#" class="btn ghost">Login</a>
+      <a href="#" class="btn primary">Register Now</a> -->
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <div class="hero-content">
+    <h1>
+      Shorten Your <span>LoOoOng</span> Links :)
+    </h1>
+
+    <p class="subtitle">
+      Shortly helps you transform long, messy URLs into clean,
+      trackable links — built for speed, clarity, and control.
+    </p>
+
+    <!-- PRIMARY CTA -->
+    <div class="cta-group">
+      <a href="{%url 'signup'%}" class="btn primary large">Get Started Free</a>
+      <a href="{%url 'login'%}" class="btn ghost large">Login to Dashboard</a>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="steps">
+      <div class="step">
+        <span>1</span>
+        <p>Create an account in seconds</p>
+      </div>
+      <div class="step">
+        <span>2</span>
+        <p>Shorten & manage your links</p>
+      </div>
+      <div class="step">
+        <span>3</span>
+        <p>Track clicks & performance</p>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="features">
+      <div class="feature">⚡ Instant links</div>
+      <div class="feature">🔒 Secure storage</div>
+      <div class="feature">📊 Real-time analytics</div>
+    </div>
+  </div>
+</section>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2026 Shortly • Built for clarity, not clutter
+  </footer>
+
+</body>
+</html>

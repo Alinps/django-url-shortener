@@ -1,0 +1,56 @@
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 3rem;
+  background: rgba(5, 7, 13, 0.75);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1f2937;
+}
+
+/* BRAND */
+.brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #e5e7eb;
+}
+
+/* RIGHT SIDE */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-link {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+}
+
+/* BUTTONS (reuse existing styles) */
+.btn {
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: #fff;
+}
+
+.btn.ghost {
+  border: 1px solid #374151;
+  color: #e5e7eb;
+}

@@ -5,13 +5,11 @@ from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 class SignUp(UserCreationForm):
     class Meta:
         model=User
-        fields=['username','first_name','last_name','email']
+        fields=['username','email']
 
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.fields["username"].widget.attrs['placeholder']='username'
-        self.fields["first_name"].widget.attrs['placeholder']='first name' 
-        self.fields["last_name"].widget.attrs['placeholder']='last name'
         self.fields["password1"].widget.attrs['placeholder']='password'
         self.fields['password2'].widget.attrs['placeholder']='confirm password'
         self.fields['email'].widget.attrs['placeholder']='email'
