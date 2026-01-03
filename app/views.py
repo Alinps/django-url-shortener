@@ -47,7 +47,6 @@ def create_short_url(request):
     if request.method=='POST':
         original_url = request.POST.get("original_url")
         short_code=short_code_generator()
-        print(short_code)
         ShortURL.objects.create(
             original_url=original_url,
             short_code=short_code
@@ -81,3 +80,7 @@ def delete_url(request,id):
         return redirect("list")
     return render(request,"delete.html",{'url':url_obj})
         
+
+def redirect_url(request,short_code):
+    url=get_object_or_404(ShortURL,short_code=short_code)
+    return redirect(url.original_url)

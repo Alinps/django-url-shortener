@@ -3,19 +3,18 @@
 
 <div>
 <h2>URLS</h2>
+<a class="btn btn-info" href="{%url 'create'%}">Add new URL</a>
 
-<table>
+<table class="table table-striped">
     <tr>
-        <th>No:</th>
         <th>Original url</th>
         <th>short url</th>
         <th>actions</th>
     </tr>
     {%for url in urls%}
     <tr>
-        <td>{{url.id}}</td>
         <td>{{url.original_url}}</td>
-        <td>{{url.short_code}}</td>
+        <td><a href="{%url 'redirect' url.short_code%}">{{url.short_code}}</a></td>
         <td>
             <a href="{%url 'update' url.id%}" class="btn btn-primary" type="submit">Edit</a>
             <a href="{%url 'delete' url.id%}" class="btn btn-danger" type="submit">Delete</a>

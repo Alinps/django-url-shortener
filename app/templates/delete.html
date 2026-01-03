@@ -1,0 +1,14 @@
+{%extends 'layout/layout.html'%}
+{%block content%}
+<div>
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Are you sure to delete the url "{{url.original_url}}!"</h3>
+            <form method="POST">
+                {%csrf_token%}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{%endblock%}

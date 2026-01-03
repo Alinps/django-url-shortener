@@ -9,5 +9,6 @@ urlpatterns = [
     path('create/',views.create_short_url,name='create'),
     path('list/',views.list_url,name='list'),
     path('edit/<int:id>',views.update_url,name='update'),
-    path("/delete/<int:id>",views.delete_url,name='delete')
+    path("/delete/<int:id>",views.delete_url,name='delete'),
+    path("/redirect/<str:short_code>",views.redirect_url,name="redirect")
 ]
