@@ -5,6 +5,7 @@ from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
 from .utils import short_code_generator
 from .models import ShortURL
+from django.db.models import F
 # Create your views here.
 def landingpage(request):
     return render(request,'landingpage.html')
@@ -88,8 +89,9 @@ def delete_url(request,id):
         url_obj.delete()
         return redirect("list")
     return render(request,"delete.html",{'url':url_obj})
-        
-@login_required
+
 def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)
+    url.click_count=F("click_count")+1
+    url.save(update_fields=["click_count"])
     return redirect(url.original_url)
