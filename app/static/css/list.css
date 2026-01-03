@@ -1,0 +1,151 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(37,99,235,0.12), transparent 60%),
+    #05070d;
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* PAGE */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* HEADER */
+.page-header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* STATS */
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #1f2937;
+  border-radius: 16px;
+  padding: 1.2rem 1.6rem;
+  min-width: 180px;
+}
+
+.stat-card .label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.stat-card .value {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.value.green {
+  color: #22c55e;
+}
+
+/* LIST CARD */
+.list-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* LIST HEADER */
+.list-header {
+  display: grid;
+  grid-template-columns: 1.2fr 2.5fr 0.8fr 0.8fr 0.8fr;
+  padding: 1.1rem 1.5rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  background: rgba(255,255,255,0.02);
+}
+
+/* ROW */
+.list-row {
+  display: grid;
+  grid-template-columns: 1.2fr 2.5fr 0.8fr 0.8fr 0.8fr;
+  padding: 1.1rem 1.5rem;
+  border-top: 1px solid #1f2937;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.short {
+  color: #60a5fa;
+}
+
+.original {
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clicks {
+  text-align: center;
+}
+
+.status {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  text-align: center;
+  width: fit-content;
+}
+
+.status.active {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+}
+
+.status.inactive {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+
+.actions {
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+/* NOTE */
+.note {
+  margin-top: 2.5rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .list-header,
+  .list-row {
+    grid-template-columns: 1.5fr 2fr 1fr;
+  }
+
+  .list-header span:nth-child(4),
+  .list-header span:nth-child(5),
+  .list-row span:nth-child(4),
+  .list-row span:nth-child(5) {
+    display: none;
+  }
+}

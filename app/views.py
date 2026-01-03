@@ -6,6 +6,7 @@ from .forms import SignUp,login_form
 from .utils import short_code_generator
 from .models import ShortURL
 from django.db.models import F
+from django.views.decorators.csrf import csrf_protect
 # Create your views here.
 def landingpage(request):
     return render(request,'landingpage.html')
@@ -35,9 +36,9 @@ def login_user(request):
         form=login_form()
     return render(request,'login.html',{'form':form})
 
-@login_required
-def home_page(request):
-    return render(request,'home.html')
+# @login_required
+# def home_page(request):
+#     return render(request,'home.html')
 
 
 @login_required(login_url='/login/')
@@ -52,7 +53,8 @@ def logout_user(request):
 
 
 @login_required
-def create_short_url(request):
+@csrf_protect
+def home_page(request):
     if request.method=='POST':
         original_url = request.POST.get("original_url")
         short_code=short_code_generator()
@@ -63,7 +65,7 @@ def create_short_url(request):
             short_code=short_code
         )
         return redirect("list")
-    return render(request,"create.html")
+    return render(request,"home.html")
 
 
 @login_required

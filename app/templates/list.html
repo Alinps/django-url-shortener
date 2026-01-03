@@ -1,26 +1,77 @@
-{%extends 'layout/layout.html'%}
-{%block content%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  {%load static%}
+  <title>Your Links — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<div>
-<h2>URLS</h2>
-<a class="btn btn-info" href="{%url 'create'%}">Add new URL</a>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{%static 'css/list.css'%}">
+  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
+  <link rel="stylesheet" href="{%static 'css/footer.css'%}">
+</head>
+<body>
+{%include 'partials/navbar.html'%}
+<main class="page">
 
-<table class="table table-striped">
-    <tr>
-        <th>Original url</th>
-        <th>short url</th>
-        <th>actions</th>
-    </tr>
-    {%for url in urls%}
-    <tr>
-        <td>{{url.original_url}}</td>
-        <td><a href="{%url 'redirect' url.short_code%}">{{url.short_code}}</a></td>
-        <td>
-            <a href="{%url 'update' url.id%}" class="btn btn-primary" type="submit">Edit</a>
-            <a href="{%url 'delete' url.id%}" class="btn btn-danger" type="submit">Delete</a>
-        </td>
-    </tr>
+  <!-- HEADER -->
+  <section class="page-header">
+    <h1>Your Shortened Links</h1>
+    <p class="subtitle">
+      Manage, monitor, and track the performance of your shortened URLs.
+    </p>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stat-card">
+      <span class="label">Total Links</span>
+      <span class="value">12</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Active Links</span>
+      <span class="value green">9</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Total Clicks</span>
+      <span class="value">14,231</span>
+    </div>
+  </section>
+
+  <!-- LIST -->
+  <section class="list-card">
+
+    <div class="list-header">
+      <span>Short Link</span>
+      <span>Original URL</span>
+      <span>Clicks</span>
+      <span>Status</span>
+      <span>Actions</span>
+    </div>
+
+    <!-- ROW -->
+     {%for url in urls%}
+    <div class="list-row">
+      <span class="short"><a href="{%url 'redirect' url.short_code%}"{{url.short_code}}>{{url.short_code}}</a></span>
+      <span class="original">{{url.original_url}}</span>
+      <span class="clicks">{{url.click_count}}</span>
+      <span class="status active">Active</span>
+      <span class="actions">📋 🔗 📊</span>
+    </div>
     {%endfor%}
-</table>
-</div>
-{%endblock%}
+
+   
+  </section>
+
+  <!-- FOOT NOTE -->
+  <section class="note">
+    <p>
+      Tip: Keep your links organized by monitoring inactive URLs and tracking click trends.
+    </p>
+  </section>
+
+</main>
+{%include 'partials/footer.html'%}
+</body>
+</html>

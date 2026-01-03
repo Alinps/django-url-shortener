@@ -99,15 +99,4 @@ button {
   font-size: 0.8rem;
 }
 
-/* FOOTER */
-.footer-text {
-  margin-top: 1.5rem;
-  font-size: 0.8rem;
-  color: #9ca3af;
-  text-align: center;
-}
 
-.footer-text a {
-  color: #60a5fa;
-  text-decoration: none;
-}
