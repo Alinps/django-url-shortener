@@ -42,29 +42,30 @@ def logout_user(request):
     return render(request,'logout.html',{'context':context})
 
 
-
+@login_required
 def create_short_url(request):
     if request.method=='POST':
         original_url = request.POST.get("original_url")
         short_code=short_code_generator()
+        print(short_code)
         ShortURL.objects.create(
+            user=request.user,
             original_url=original_url,
             short_code=short_code
         )
-        messages.success(request,"Successfully shortened the URL")
-        return render(request,"create.html")
+        return redirect("list")
     return render(request,"create.html")
 
 
-
+@login_required
 def list_url(request):
-    urls = ShortURL.objects.all().order_by("-created_at")
+    urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
     return render(request,"list.html",{"urls":urls})
 
 
-
+@login_required
 def update_url(request,id):
-    url_obj=get_object_or_404(ShortURL,id=id)
+    url_obj=get_object_or_404(ShortURL,id=id,user=request.user)
     if request.method=="POST":
         new_url=request.POST.get("original_url")
         url_obj.original_url=new_url
@@ -72,15 +73,15 @@ def update_url(request,id):
         return redirect("list")
     return render(request,"edit.html",{"url":url_obj})
 
-
+@login_required
 def delete_url(request,id):
-    url_obj=get_object_or_404(ShortURL,id=id)
+    url_obj=get_object_or_404(ShortURL,id=id,user=request.user)
     if request.method=='POST':
         url_obj.delete()
         return redirect("list")
     return render(request,"delete.html",{'url':url_obj})
         
-
+@login_required
 def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)
     return redirect(url.original_url)
