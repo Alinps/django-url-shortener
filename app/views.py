@@ -7,6 +7,7 @@ from .utils import short_code_generator
 from .models import ShortURL
 from django.db.models import F
 from django.views.decorators.csrf import csrf_protect
+from django.db.models import Sum
 # Create your views here.
 def landingpage(request):
     return render(request,'landingpage.html')
@@ -71,7 +72,16 @@ def home_page(request):
 @login_required
 def list_url(request):
     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
-    return render(request,"list.html",{"urls":urls})
+    total_clicks=urls.aggregate(
+        total=Sum("click_count")
+    )["total"] or 0
+    total_urls=urls.count()
+    print(total_clicks)
+    return render(request,"list.html",{
+        "urls":urls,
+        "total_clicks":total_clicks,
+        "total_urls":total_urls
+        })
 
 
 @login_required
