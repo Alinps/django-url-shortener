@@ -45,6 +45,12 @@
   font-size: 0.85rem;
 }
 
+.gradient-text{
+  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .btn.primary {
   background: linear-gradient(135deg, #2563eb, #4f46e5);
   color: #fff;

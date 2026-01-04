@@ -27,12 +27,12 @@
   <section class="edit-card">
 
     <form method="post">
-      <!-- Django: {% csrf_token %} -->
+       {% csrf_token %} 
 
       <!-- SHORT URL (READ ONLY) -->
       <div class="field">
         <label>Short URL</label>
-        <input type="text" value="short.ly/aZ3x9" readonly>
+        <input type="text" value="short.ly/{{url.short_code}}" readonly>
       </div>
 
       <!-- ORIGINAL URL -->
@@ -41,7 +41,7 @@
         <input
           type="url"
           name="original_url"
-          value="https://www.youtube.com/watch?v=J7ZmH0IuKk"
+          value="{{url.original_url}}"
           required
         >
       </div>
@@ -50,8 +50,8 @@
       <div class="field">
         <label>Status</label>
         <select name="status">
-          <option value="active" selected>Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="True" selected>Active</option>
+          <option value="False">Inactive</option>
         </select>
       </div>
 

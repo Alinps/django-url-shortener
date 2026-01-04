@@ -57,12 +57,15 @@ def logout_user(request):
 def home_page(request):
     if request.method=='POST':
         original_url = request.POST.get("original_url")
+        title=request.POST.get("title")
+        print(title)
         short_code=short_code_generator()
         print(short_code)
         ShortURL.objects.create(
             user=request.user,
             original_url=original_url,
             short_code=short_code,
+            title=title
         )
         return redirect("list")
     return render(request,"home.html")
@@ -92,7 +95,9 @@ def update_url(request,id):
     url_obj=get_object_or_404(ShortURL,id=id,user=request.user)
     if request.method=="POST":
         new_url=request.POST.get("original_url")
+        new_status=request.POST.get("status")
         url_obj.original_url=new_url
+        url_obj.is_active=new_status
         url_obj.save()
         return redirect("list")
     return render(request,"edit.html",{"url":url_obj})

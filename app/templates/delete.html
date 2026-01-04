@@ -33,9 +33,9 @@
     </p>
 
     <div class="link-preview">
-      <span class="short">short.ly/aZ3x9</span>
+      <span class="short">short.ly/{{url.short_code}}</span>
       <span class="original">
-        https://www.youtube.com/watch?v=J7ZmH0IuKk
+        {{url.original_url}}
       </span>
     </div>
 
@@ -44,13 +44,13 @@
     </p>
 
     <form method="post">
-      <!-- Django: {% csrf_token %} -->
+       {% csrf_token %} 
 
       <div class="actions">
         <button type="submit" class="btn danger">
           Yes, delete this link
         </button>
-        <a href="#" class="btn ghost">
+        <a href="{%url 'home'%}" class="btn ghost">
           Cancel
         </a>
       </div>

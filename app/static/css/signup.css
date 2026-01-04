@@ -82,6 +82,13 @@ button {
   cursor: pointer;
 }
 
+.gradient-text{
+  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
 /* ERRORS */
 .error {
   display: block;

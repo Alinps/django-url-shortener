@@ -17,7 +17,7 @@
 
   <!-- HEADER -->
   <section class="page-header">
-    <h1>Your Shortened Links</h1>
+    <h1 class="gradient-text">Your Shortened Links</h1>
     <p class="subtitle">
       Manage, monitor, and track the performance of your shortened URLs.
     </p>
@@ -51,13 +51,15 @@
   <!-- LIST -->
   <section class="list-card">
 
-    <div class="list-header">
-      <span>Short Link</span>
-      <span>Original URL</span>
-      <span>Clicks</span>
-      <span>Status</span>
-      <span>Actions</span>
-    </div>
+<div class="list-header">
+  <span>Short Link</span>
+  <span>Title</span>
+  <span>Original URL</span>
+  <span>Clicks</span>
+  <span>Status</span>
+  <span>Actions</span>
+</div>
+
 
     <!-- ROW -->
      {%for url in urls%}
@@ -67,6 +69,7 @@
       {{ url.short_code }}
     </a>
   </span>
+  <span class="title">{{url.title}}</span>
 
   <span class="original">{{ url.original_url }}</span>
 

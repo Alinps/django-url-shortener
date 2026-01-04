@@ -12,6 +12,12 @@ body {
     #05070d;
   color: #e5e7eb;
 }
+.gradient-text{
+  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 
 
 /* MAIN CONTAINER */
