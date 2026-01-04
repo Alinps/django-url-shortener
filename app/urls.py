@@ -11,5 +11,6 @@ urlpatterns = [
     path('edit/<int:id>',views.update_url,name='update'),
     path("/delete/<int:id>",views.delete_url,name='delete'),
     path("/redirect/<str:short_code>",views.redirect_url,name="redirect"),
-    path("togglestatus/<int:id>",views.toggle_url_status,name="toggle")
+    path("togglestatus/<int:id>",views.toggle_url_status,name="toggle"),
+    path("aboutus/",views.aboutus,name="aboutus")
 ]

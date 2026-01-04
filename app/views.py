@@ -64,7 +64,7 @@ def home_page(request):
         ShortURL.objects.create(
             user=request.user,
             original_url=original_url,
-            short_code=short_code
+            short_code=short_code,
         )
         return redirect("list")
     return render(request,"home.html")
@@ -115,9 +115,13 @@ def redirect_url(request,short_code):
     url.save(update_fields=["click_count"])
     return redirect(url.original_url)
 
-
+@login_required
 def toggle_url_status(request,id):
     url=get_object_or_404(ShortURL,id=id,user=request.user)
     url.is_active=not url.is_active
     url.save(update_fields=["is_active"])
     return redirect("list")
+
+@login_required
+def aboutus(request):
+    return render(request,'about.html')
