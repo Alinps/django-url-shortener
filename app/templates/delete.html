@@ -1,14 +1,64 @@
-{%extends 'layout/layout.html'%}
-{%block content%}
-<div>
-    <div class="card">
-        <div class="card-body">
-            <h3 class="card-title">Are you sure to delete the url "{{url.original_url}}!"</h3>
-            <form method="POST">
-                {%csrf_token%}
-                <button type="submit" class="btn btn-danger">Delete</button>
-            </form>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  {%load static%}
+  <title>Delete Link — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/delete.css'%}">
+    <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
+  <link rel="stylesheet" href="{%static 'css/footer.css'%}">
+</head>
+<body>
+{%include 'partials/navbar.html'%}
+<main class="page">
+
+  <!-- HEADER -->
+  <section class="page-header">
+    <h1>Delete Short Link</h1>
+    <p class="subtitle">
+      This action is permanent and cannot be undone.
+    </p>
+  </section>
+
+  <!-- CONFIRM CARD -->
+  <section class="confirm-card">
+
+    <div class="warning-icon">⚠️</div>
+
+    <p class="message">
+      You are about to permanently delete the following short link:
+    </p>
+
+    <div class="link-preview">
+      <span class="short">short.ly/aZ3x9</span>
+      <span class="original">
+        https://www.youtube.com/watch?v=J7ZmH0IuKk
+      </span>
     </div>
-</div>
-{%endblock%}
+
+    <p class="note">
+      All click history and analytics associated with this link will be removed.
+    </p>
+
+    <form method="post">
+      <!-- Django: {% csrf_token %} -->
+
+      <div class="actions">
+        <button type="submit" class="btn danger">
+          Yes, delete this link
+        </button>
+        <a href="#" class="btn ghost">
+          Cancel
+        </a>
+      </div>
+    </form>
+
+  </section>
+
+</main>
+{%include 'partials/footer.html'%}
+</body>
+</html>

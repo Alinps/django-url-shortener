@@ -31,7 +31,11 @@
     </div>
     <div class="stat-card">
       <span class="label">Active Links</span>
-      <span class="value green">9</span>
+      <span class="value green">{{active_urls}}</span>
+    </div>
+    <div class="stat-card">
+      <span class="label">Disabled Links</span>
+      <span class="value red" style="color:red;">{{disabled_urls}}</span>
     </div>
     <div class="stat-card">
       <span class="label">Total Clicks</span>
@@ -52,13 +56,33 @@
 
     <!-- ROW -->
      {%for url in urls%}
-    <div class="list-row">
-      <span class="short"><a href="{%url 'redirect' url.short_code%}"{{url.short_code}}>{{url.short_code}}</a></span>
-      <span class="original">{{url.original_url}}</span>
-      <span class="clicks">{{url.click_count}}</span>
-      <span class="status active">Active</span>
-      <span class="actions">📋 🔗 📊</span>
-    </div>
+   <div class="list-row">
+  <span class="short">
+    <a href="{% url 'redirect' url.short_code %}">
+      {{ url.short_code }}
+    </a>
+  </span>
+
+  <span class="original">{{ url.original_url }}</span>
+
+  <span class="clicks">{{ url.click_count }}</span>
+
+  {% if url.is_active %}
+    <span class="status active">Active</span>
+  {% else %}
+    <span class="status inactive">Disabled</span>
+  {% endif %}
+
+  <span class="actions">
+    <a class="toggle-icon {% if url.is_active %}active{% endif %}"
+       href="{% url 'toggle' url.id %}">⏻</a>
+
+    <a href="{% url 'update' url.id %}" class="edit">📝</a>
+
+    <a href="{% url 'delete' url.id %}" class="delete">🗑</a>
+  </span>
+</div>
+
     {%endfor%}
 
    
@@ -73,5 +97,6 @@
 
 </main>
 {%include 'partials/footer.html'%}
+
 </body>
 </html>

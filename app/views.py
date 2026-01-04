@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -76,11 +77,15 @@ def list_url(request):
         total=Sum("click_count")
     )["total"] or 0
     total_urls=urls.count()
+    active_urls=urls.filter(is_active=True).count()
+    disabled_urls=urls.filter(is_active=False).count()
     print(total_clicks)
     return render(request,"list.html",{
         "urls":urls,
         "total_clicks":total_clicks,
-        "total_urls":total_urls
+        "total_urls":total_urls,
+        "active_urls":active_urls,
+        "disabled_urls":disabled_urls
         })
 
 
@@ -104,6 +109,15 @@ def delete_url(request,id):
 
 def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)
+    if not url.is_active:
+        raise Http404("Thid URL is disabled")
     url.click_count=F("click_count")+1
     url.save(update_fields=["click_count"])
     return redirect(url.original_url)
+
+
+def toggle_url_status(request,id):
+    url=get_object_or_404(ShortURL,id=id,user=request.user)
+    url.is_active=not url.is_active
+    url.save(update_fields=["is_active"])
+    return redirect("list")

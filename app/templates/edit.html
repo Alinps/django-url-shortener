@@ -1,14 +1,78 @@
-{%extends 'layout/layout.html'%}
-{%block content%}
-<div>
-    <div class="card">
-        <div class="card-body">
-            <form method="POST">
-                {%csrf_token%}
-                <input type="url" name="original_url" class="form-controll" placeholder="enter the url" value="{{url.original_url}}">
-                <button type="submit" class="btn btn-primary">Edit</button>
-            </form>
-        </div>
-    </div>
-</div>
-{%endblock%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  {%load static%}
+  <title>Edit Link — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/edit.css'%}">
+<link rel="stylesheet" href="{%static 'css/navbar.css'%}">
+
+</head>
+<body>
+{%include 'partials/navbar.html'%}
+<main class="page">
+
+  <!-- HEADER -->
+  <section class="page-header">
+    <h1>Edit Short Link</h1>
+    <p class="subtitle">
+      Update the destination or status of your shortened URL.
+    </p>
+  </section>
+
+  <!-- CARD -->
+  <section class="edit-card">
+
+    <form method="post">
+      <!-- Django: {% csrf_token %} -->
+
+      <!-- SHORT URL (READ ONLY) -->
+      <div class="field">
+        <label>Short URL</label>
+        <input type="text" value="short.ly/aZ3x9" readonly>
+      </div>
+
+      <!-- ORIGINAL URL -->
+      <div class="field">
+        <label>Original URL</label>
+        <input
+          type="url"
+          name="original_url"
+          value="https://www.youtube.com/watch?v=J7ZmH0IuKk"
+          required
+        >
+      </div>
+
+      <!-- STATUS -->
+      <div class="field">
+        <label>Status</label>
+        <select name="status">
+          <option value="active" selected>Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="actions">
+        <button type="submit" class="btn primary">Save Changes</button>
+        <a href="#" class="btn ghost">Cancel</a>
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- HELP TEXT -->
+  <section class="note">
+    <p>
+      Tip: Disabling a link will stop redirection without deleting its history.
+    </p>
+  </section>
+
+</main>
+{%include 'partials/footer.html'%}
+</body>
+</html>
