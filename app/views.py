@@ -44,14 +44,12 @@ def login_user(request):
 
 
 @login_required(login_url='/login/')
+@csrf_protect
 def logout_user(request):
     if request.method=='POST':
         logout(request)
         return redirect('login')
-    context={
-        'user':request.user
-    }
-    return render(request,'logout.html',{'context':context})
+    return render(request,'logout.html')
 
 
 @login_required

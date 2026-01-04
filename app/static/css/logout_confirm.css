@@ -1,0 +1,99 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(37,99,235,0.12), transparent 60%),
+    #05070d;
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* PAGE */
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* HEADER */
+.page-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* CARD */
+.confirm-card {
+  margin-top: 2.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+/* ICON */
+.icon {
+  font-size: 2.3rem;
+  margin-bottom: 1rem;
+}
+
+/* TEXT */
+.message {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.note {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 2.5rem;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+}
+
+/* PRIMARY */
+.btn.primary {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: white;
+  font-weight: 600;
+}
+
+/* CANCEL */
+.btn.ghost {
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  background: transparent;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .confirm-card {
+    padding: 2.2rem;
+  }
+}
