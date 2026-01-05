@@ -97,20 +97,22 @@ def list_url(request):
 
 
 @login_required
-def update_url(request,id):
-    url_obj=get_object_or_404(ShortURL,id=id,user=request.user)
+def update_url(request,ids):
+    url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
     if request.method=="POST":
         new_url=request.POST.get("original_url")
         new_status=request.POST.get("status")
+        new_title=request.POST.get("title")
         url_obj.original_url=new_url
         url_obj.is_active=new_status
+        url_obj.title=new_title
         url_obj.save()
         return redirect("list")
     return render(request,"edit.html",{"url":url_obj})
 
 @login_required
-def delete_url(request,id):
-    url_obj=get_object_or_404(ShortURL,id=id,user=request.user)
+def delete_url(request,ids):
+    url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
     if request.method=='POST':
         url_obj.delete()
         return redirect("list")
@@ -125,8 +127,8 @@ def redirect_url(request,short_code):
     return redirect(url.original_url)
 
 @login_required
-def toggle_url_status(request,id):
-    url=get_object_or_404(ShortURL,id=id,user=request.user)
+def toggle_url_status(request,ids):
+    url=get_object_or_404(ShortURL,id=ids,user=request.user)
     url.is_active=not url.is_active
     url.save(update_fields=["is_active"])
     return redirect("list")
