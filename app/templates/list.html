@@ -88,6 +88,11 @@
     <a href="{% url 'update' url.id %}" class="edit">📝</a>
 
     <a href="{% url 'delete' url.id %}" class="delete">🗑</a>
+    <a 
+        data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"
+        onclick="copyToClipboard(this)"
+        >🔗</a>
+        
   </span>
 </div>
 
@@ -105,6 +110,6 @@
 
 </main>
 {%include 'partials/footer.html'%}
-
+<script src="{%static 'js/list.js' %}"></script>
 </body>
 </html>

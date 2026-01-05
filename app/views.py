@@ -113,7 +113,7 @@ def delete_url(request,id):
 def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)
     if not url.is_active:
-        raise Http404("Thid URL is disabled")
+        raise Http404("This URL is disabled")
     url.click_count=F("click_count")+1
     url.save(update_fields=["click_count"])
     return redirect(url.original_url)
