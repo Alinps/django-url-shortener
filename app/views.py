@@ -73,7 +73,10 @@ def home_page(request):
 
 @login_required
 def list_url(request):
+    query=request.GET.get("q","")
     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
+    if query:
+        urls=urls.filter(title__icontains=query)
     total_clicks=urls.aggregate(
         total=Sum("click_count")
     )["total"] or 0

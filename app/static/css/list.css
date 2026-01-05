@@ -185,6 +185,55 @@ body {
 }
 
 
+/* SEARCH */
+.search-wrapper {
+  margin-top: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Search button */
+.search-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid #374151;
+  background: rgba(255,255,255,0.03);
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Search form */
+.search-form {
+  flex: 1;
+  max-width: 420px;
+}
+
+/* Input */
+.search-form input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  color: #e5e7eb;
+  outline: none;
+  font-size: 0.85rem;
+}
+
+/* Focus effect */
+.search-form input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+}
+
+/* Hidden state */
+.hidden {
+  display: none;
+}
+
+
 
 /* NOTE */
 .note {

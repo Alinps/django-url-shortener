@@ -21,6 +21,21 @@
     <p class="subtitle">
       Manage, monitor, and track the performance of your shortened URLs.
     </p>
+      
+      <div class="search-wrapper">
+            <button id="searchToggle" class="search-btn">
+                🔍 Search
+            </button>
+
+            <form method="get" id="searchForm" class="search-form hidden">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search by title, short link or URL…"
+                    value="{{ request.GET.q }}"
+                />
+            </form>
+      </div>
   </section>
 
   <!-- STATS -->
