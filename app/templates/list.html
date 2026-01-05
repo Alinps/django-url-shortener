@@ -28,12 +28,14 @@
             </button>
 
             <form method="get" id="searchForm" class="search-form hidden">
-                <input
-                    type="text"
-                    name="q"
-                    placeholder="Search by title, short link or URL…"
-                    value="{{ request.GET.q }}"
-                />
+                <label>
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search by title, short link or URL…"
+                        value="{{ request.GET.q }}"
+                        />
+                </label>
             </form>
       </div>
   </section>
@@ -110,13 +112,29 @@
         
   </span>
 </div>
-
     {%endfor%}
 
-   
   </section>
+ <div class="pagination">
+  {% if urls.has_previous %}
+    <a class="page-btn prev" href="?page={{ urls.previous_page_number }}">← Previous</a>
+  {% else %}
+    <span class="page-btn disabled">← Previous</span>
+  {% endif %}
 
-  <!-- FOOT NOTE -->
+  <span class="page-info">
+    Page {{ urls.number }} of {{ urls.paginator.num_pages }}
+  </span>
+
+  {% if urls.has_next %}
+    <a class="page-btn next" href="?page={{ urls.next_page_number }}">Next →</a>
+  {% else %}
+    <span class="page-btn disabled">Next →</span>
+  {% endif %}
+</div>
+
+
+  <!-- FOOTNOTE -->
   <section class="note">
     <p>
       Tip: Keep your links organized by monitoring inactive URLs and tracking click trends.

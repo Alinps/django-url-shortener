@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
@@ -75,6 +76,9 @@ def home_page(request):
 def list_url(request):
     query=request.GET.get("q","")
     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
+    paginator = Paginator(urls, 10)  # 10 urls per page
+    page_number = request.GET.get("page")
+    url_qs = paginator.get_page(page_number)
     if query:
         urls=urls.filter(title__icontains=query)
     total_clicks=urls.aggregate(
@@ -83,9 +87,8 @@ def list_url(request):
     total_urls=urls.count()
     active_urls=urls.filter(is_active=True).count()
     disabled_urls=urls.filter(is_active=False).count()
-    print(total_clicks)
     return render(request,"list.html",{
-        "urls":urls,
+        "urls":url_qs,
         "total_clicks":total_clicks,
         "total_urls":total_urls,
         "active_urls":active_urls,
