@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Create Account — Shortly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/signup.css' %}">
@@ -53,7 +53,15 @@
       <!-- PASSWORD 1 -->
       <div class="field">
         <label>Password</label>
+      <div class="password-wrapper">
         {{ form.password1 }}
+          <span class="toggle-password">
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+          </span>
+      </div>
         {% for error in form.password1.errors %}
           <span class="error">{{ error }}</span>
         {% endfor %}
@@ -62,7 +70,15 @@
       <!-- PASSWORD 2 -->
       <div class="field">
         <label>Confirm Password</label>
+      <div class="password-wrapper">
         {{ form.password2 }}
+          <span class="toggle-password">
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+          </span>
+      </div>
         {% for error in form.password2.errors %}
           <span class="error">{{ error }}</span>
         {% endfor %}
@@ -82,5 +98,6 @@
 
 </div>
  {%include 'partials/footer.html'%}
+<script src="{% static "js/signup.js" %}"></script>
 </body>
 </html>

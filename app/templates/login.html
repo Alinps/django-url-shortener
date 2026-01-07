@@ -43,7 +43,15 @@
       <!-- PASSWORD -->
       <div class="field">
         <label>Password</label>
+        <div class="password-wrapper">
         {{ form.password }}
+        <span class="toggle-password">
+            <svg viewBox="0 0 24 24" class="eye-icon">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </span>
+        </div>
         {% for error in form.password.errors %}
           <span class="error">{{ error }}</span>
         {% endfor %}
@@ -60,9 +68,12 @@
       Don’t have an account?
       <a href="{% url 'signup' %}">Create one</a>
     </p>
+     <p class="footer-text">
+      <a href="{% url 'forgotpassword' %}">forgot password</a>
+    </p>
 
   </div>
 </div>
-
+<script src="{% static 'js/login.js' %}"></script>
 </body>
 </html>

@@ -10,6 +10,10 @@ from .models import ShortURL
 from django.db.models import F
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
+from django.contrib.auth.models import User
+from .utils import generate_otp,send_reset_otp
+from .models import PasswordResetOTP
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 def landingpage(request):
     return render(request,'landingpage.html')
@@ -136,3 +140,51 @@ def toggle_url_status(request,ids):
 @login_required
 def aboutus(request):
     return render(request,'about.html')
+
+
+def forgot_password(request):
+    if request.method=="POST":
+        email=request.POST.get("email")
+        if not User.objects.filter(email=email).exists():
+            return render(request,"forgot_password.html",{
+                "error":"No account found with this email"
+            })
+        otp=generate_otp()
+        PasswordResetOTP.objects.create(
+            email=email,
+            otp=otp
+        )
+        send_reset_otp(email,otp)
+        request.session["reset_email"]=email
+        messages.success(request, "OTP has been sent successfully to your email.")
+        return redirect("verify_reset_otp")
+    return render(request,"forgot_password.html")
+
+
+
+#verify reset otp
+
+def verify_reset_otp(request):
+    if request.method=="POST":
+        otp_input=request.POST.get("otp")
+        new_password=request.POST.get("password")
+        email=request.session.get("reset_email")
+
+        otp_obj=get_object_or_404(
+            PasswordResetOTP,
+            email=email,
+            otp=otp_input
+        )
+        if otp_obj.is_expired():
+            otp_obj.delete()
+            return render(request,"reset_password.html",{
+                "error":"OTP expired"
+            })
+        user=User.objects.get(email=email)
+        user.password=make_password(new_password)
+        user.save()
+
+        otp_obj.delete()
+        del request.session["reset_email"]
+        return redirect("login")
+    return render(request,"reset_password.html")
