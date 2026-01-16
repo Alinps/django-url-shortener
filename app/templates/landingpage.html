@@ -16,8 +16,8 @@
   <header class="navbar">
     <div class="logo">🔗 Shortly</div>
     <div class="nav-actions">
-      <!-- <a href="#" class="btn ghost">Login</a>
-      <a href="#" class="btn primary">Register Now</a> -->
+       <a href="{% url 'aboutus' %}" class="btn ghost">About Us</a>
+{#      <a href="#" class="btn primary">Register Now</a> #}
     </div>
   </header>
 
@@ -38,7 +38,7 @@
 
     <!-- PRIMARY CTA -->
     <div class="cta-group">
-      <a href="{%url 'signup'%}" class="btn primary large">Get Started Free</a>
+      <a href="{%url 'auth_choice'%}" class="btn primary large">Get Started Free</a>
       <a href="{%url 'login'%}" class="btn ghost large">Login to Dashboard</a>
     </div>
 

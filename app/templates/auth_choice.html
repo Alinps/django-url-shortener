@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get Started — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/auth_css.css' %}">
+</head>
+<body>
+
+<main class="page">
+
+  <!-- HEADER -->
+  <section class="page-header">
+    <h1>Welcome to Shortly</h1>
+    <p class="subtitle">
+      Choose how you’d like to continue.
+    </p>
+  </section>
+
+  <!-- CARD -->
+  <section class="choice-card">
+
+    <!-- GOOGLE -->
+    <a href="{% url 'google_login' %}" class="auth-option google">
+      <div class="icon">
+        <!-- Simple Google-style G (SVG-free, neutral) -->
+        <span>G</span>
+      </div>
+      <div class="text">
+        <strong>Continue with Google</strong>
+        <span>Fast and secure sign-in</span>
+      </div>
+    </a>
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <!-- EMAIL -->
+    <a href="{% url 'signup' %}" class="auth-option email">
+      <div class="icon">
+        ✉️
+      </div>
+      <div class="text">
+        <strong>Sign up with email</strong>
+        <span>Create an account using your email</span>
+      </div>
+    </a>
+
+  </section>
+
+  <!-- FOOT NOTE -->
+  <p class="note">
+    By continuing, you agree to Shortly’s terms and privacy policy.
+  </p>
+
+</main>
+
+</body>
+</html>

@@ -4,13 +4,12 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 def short_code_generator(length=6):
-    short_code=""
+    short_list=[]
     chars=string.ascii_letters+string.digits
-    i=0
-    while(i<length):
-        short_code+=random.choice(chars)
-        i+=1
-    return short_code
+    for _ in range(length):
+        short_list.append(random.choice(chars))
+    return ''.join(short_list)
+
 
 def generate_otp():
     return str(random.randint(100000,999999))

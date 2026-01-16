@@ -170,3 +170,24 @@ button {
   color: #60a5fa;
   text-decoration: none;
 }
+.icon{
+  display: flex;
+  font-size: 1.5rem;
+  color: #62a5e2;
+  justify-content: center ;
+  margin-top: 0.8rem;
+  text-decoration: none;
+  transition: all 0.25s ease;
+
+}
+.icon:hover {
+  transform: translateY(-8px) scale(1.08);
+
+}
+.icon-para{
+  display: flex;
+  justify-content: center;
+  margin-top: 0.8rem;
+  font-size: 0.8rem;
+  color: #60a5fa;
+}

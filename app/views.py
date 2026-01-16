@@ -14,7 +14,14 @@ from django.contrib.auth.models import User
 from .utils import generate_otp,send_reset_otp
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.cache import never_cache
 # Create your views here.
+
+
+def auth_choice(request):
+    return render(request,'auth_choice.html')
+
+
 def landingpage(request):
     return render(request,'landingpage.html')
 
@@ -48,6 +55,7 @@ def login_user(request):
 #     return render(request,'home.html')
 
 
+@never_cache
 @login_required(login_url='/login/')
 @csrf_protect
 def logout_user(request):
@@ -56,7 +64,7 @@ def logout_user(request):
         return redirect('login')
     return render(request,'logout.html')
 
-
+@never_cache
 @login_required
 @csrf_protect
 def home_page(request):
@@ -75,7 +83,7 @@ def home_page(request):
         return redirect("list")
     return render(request,"home.html")
 
-
+@never_cache
 @login_required
 def list_url(request):
     query=request.GET.get("q","")
@@ -87,7 +95,7 @@ def list_url(request):
         urls=urls.filter(title__icontains=query)
     total_clicks=urls.aggregate(
         total=Sum("click_count")
-    )["total"] or 0
+    )["total"] or 0    #if no url Sum returns none, "or 0" prevents template crashes
     total_urls=urls.count()
     active_urls=urls.filter(is_active=True).count()
     disabled_urls=urls.filter(is_active=False).count()
@@ -99,7 +107,7 @@ def list_url(request):
         "disabled_urls":disabled_urls
         })
 
-
+@never_cache
 @login_required
 def update_url(request,ids):
     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
@@ -114,6 +122,7 @@ def update_url(request,ids):
         return redirect("list")
     return render(request,"edit.html",{"url":url_obj})
 
+@never_cache
 @login_required
 def delete_url(request,ids):
     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
@@ -126,9 +135,10 @@ def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)
     if not url.is_active:
         raise Http404("This URL is disabled")
-    url.click_count=F("click_count")+1
+    url.click_count=F("click_count")+1   #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
     url.save(update_fields=["click_count"])
     return redirect(url.original_url)
+
 
 @login_required
 def toggle_url_status(request,ids):
@@ -137,7 +147,8 @@ def toggle_url_status(request,ids):
     url.save(update_fields=["is_active"])
     return redirect("list")
 
-@login_required
+
+
 def aboutus(request):
     return render(request,'about.html')
 
@@ -156,14 +167,14 @@ def forgot_password(request):
         )
         send_reset_otp(email,otp)
         request.session["reset_email"]=email
-        messages.success(request, "OTP has been sent successfully to your email.")
         return redirect("verify_reset_otp")
     return render(request,"forgot_password.html")
 
 
 
-#verify reset otp
 
+
+#verify reset otp
 def verify_reset_otp(request):
     if request.method=="POST":
         otp_input=request.POST.get("otp")

@@ -40,7 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles','app'
+    'django.contrib.staticfiles',
+    'app',
+    'django_extensions',
+    'django.contrib.sites',
+
+    # allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -73,6 +83,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'urlshortner.wsgi.application'
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SITE_ID = 1
+
+LOGIN_REDIRECT_URL='/list/'
+LOGOUT_REDIRECT_URL='/login/'
+ACCOUNT_EMAIL_REQUIRED=True
+ACCOUNT_USERNAME_REQUITED=False
+ACCOUNT_AUTHENTICATION_METHOD="email"
+ACCOUNT_EMAIL_VERIFICATION="optional"
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+
+
 
 
 # Email configuration (Gmail SMTP)

@@ -5,7 +5,8 @@
   <title>Login — Shortly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
@@ -59,6 +60,11 @@
 
       <button type="submit">Login</button>
     </form>
+    <p class="icon-para">Or continue with</p>
+     <a href="{% url 'google_login' %}"  traget="_self">
+    <span class="icon"><i class="fa-brands fa-google"></i></span>
+    </a>
+
 <!-- 
     <div class="footer-links">
       <a href="#">Forgot password?</a>
@@ -66,7 +72,7 @@
 
     <p class="footer-text">
       Don’t have an account?
-      <a href="{% url 'signup' %}">Create one</a>
+      <a href="{% url 'auth_choice' %}">Create one</a>
     </p>
      <p class="footer-text">
       <a href="{% url 'forgotpassword' %}">forgot password</a>
