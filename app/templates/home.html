@@ -19,29 +19,27 @@
   <main class="container">
     <div class="card">
 
-      <h1 class="gradient-text">Shorten a link</h1>
+      <h1>Shorten a link</h1>
       <p class="subtitle">
         Paste your long URL below and generate a clean, shareable link instantly.
       </p>
 
       <form method="POST">
         {% csrf_token %}
-
-        <div class="input-group">
-          <span class="icon">🔗</span>
+        <div>
           <input
             type="url"
             name="original_url"
-            placeholder="https://example.com/very/long/link"
+            placeholder="🔗 https://example.com/very/long/link"
             required
           >
         </div>
-        <div class="input-group">
-          <span class="icon">🔗</span>
+        <div>
+
           <input
             type="text"
             name="title"
-            placeholder="tilte of the link"
+            placeholder="🔗 tilte of the link"
             required
           >
         </div>

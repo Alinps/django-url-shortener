@@ -7,7 +7,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.2rem 3rem;
-  background: rgba(5, 7, 13, 0.75);
+  background: rgba(23, 33, 60, 0.75);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid #1f2937;
 }
@@ -46,9 +46,10 @@
 }
 
 .gradient-text{
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+   background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
 }
 
 .btn.primary {

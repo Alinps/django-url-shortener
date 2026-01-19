@@ -6,9 +6,16 @@
 }
 
 body {
-  background: radial-gradient(circle at top, #0b1220, #05070d);
+  background: radial-gradient(circle at top, #1f2f4d, #05070d);
   color: #e5e7eb;
   min-height: 100vh;
+}
+.navbar-brand{
+  background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
+
 }
 
 /* NAVBAR */
@@ -21,6 +28,7 @@ body {
 .logo {
   font-weight: 700;
   font-size: 1.3rem;
+
 }
 
 .nav-actions {
@@ -37,12 +45,15 @@ body {
 
 .btn.ghost {
   border: 1px solid #374151;
-  color: #e5e7eb;
+   background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: white;
+  background: linear-gradient(135deg, #22D3EE, #0EA5E9);
+ color: #042F2E;
 }
 
 /* HERO */
@@ -74,9 +85,10 @@ body {
 }
 
 .hero h1 span {
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+  background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
 }
 
 .subtitle {

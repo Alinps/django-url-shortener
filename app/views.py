@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
-from django.contrib import messages
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
@@ -31,7 +31,6 @@ def register(request):
         form=SignUp(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request,"Registration Successfull")
             return redirect('login')
     else:   
         form=SignUp()
@@ -88,11 +87,12 @@ def home_page(request):
 def list_url(request):
     query=request.GET.get("q","")
     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
+    if query:
+        urls=urls.filter(title__icontains=query)
     paginator = Paginator(urls, 10)  # 10 urls per page
     page_number = request.GET.get("page")
     url_qs = paginator.get_page(page_number)
-    if query:
-        urls=urls.filter(title__icontains=query)
+
     total_clicks=urls.aggregate(
         total=Sum("click_count")
     )["total"] or 0    #if no url Sum returns none, "or 0" prevents template crashes

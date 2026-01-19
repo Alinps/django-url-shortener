@@ -6,17 +6,16 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at top, rgba(37,99,235,0.12), transparent 60%),
-    #05070d;
-  color: #e5e7eb;
+    background: radial-gradient(circle at top, #1f2f4d, #05070d);
+    color: #e5e7eb;
   min-height: 100vh;
 }
 
 .gradient-text{
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+ background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
 }
 
 /* PAGE */

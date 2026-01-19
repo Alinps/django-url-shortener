@@ -6,19 +6,19 @@
 }
 
 body {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at center, rgba(37,99,235,0.15), transparent 60%),
-    #05070d;
+  background: radial-gradient(circle at top, #1f2f4d, #05070d);
   color: #e5e7eb;
+  min-height: 100vh;
 }
-.gradient-text{
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
+
+
+h1 {
+  background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
+  font-weight: 700;
 }
-
-
 
 /* MAIN CONTAINER */
 .container {
@@ -50,45 +50,52 @@ body {
 .subtitle {
   color: #9ca3af;
   font-size: 0.95rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 /* INPUT */
-.input-group {
-  display: flex;
-  align-items: center;
-  background: #0b1220;
+input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: #071026;
   border: 1px solid #1f2937;
   border-radius: 999px;
-  padding: 0.6rem 1rem;
-  margin-bottom: 1.8rem;
-}
-
-.input-group .icon {
-  margin-right: 0.6rem;
-  opacity: 0.7;
-}
-
-.input-group input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
   color: #e5e7eb;
+  outline: none;
+  margin-top: 0.5rem ;
+  margin-bottom: 0.5rem;
   font-size: 0.95rem;
+}
+
+
+
+
+input:focus{
+  border-color: #0c9fa6;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.3);
 }
 
 /* BUTTON */
 .primary-btn {
   width: 100%;
   padding: 0.9rem;
+  margin-top: 0.5rem;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
-  color: white;
+  background: linear-gradient(135deg, #22D3EE, #0EA5E9);
+  color: #042F2E;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.primary-btn:hover {
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
 }
 
 /* HINT */
@@ -98,11 +105,7 @@ body {
   color: #9ca3af;
 }
 
-.gradient-text{
-  background: linear-gradient(60deg, #9bd8f1, #8d72db);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+
 
 /* RESPONSIVE */
 @media (max-width: 600px) {

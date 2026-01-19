@@ -65,56 +65,95 @@
     </div>
   </section>
 
-  <!-- LIST -->
-  <section class="list-card">
+<div class="table-wrapper">
+  <table class="url-table">
+    <thead>
+      <tr>
+        <th>Short Link</th>
+        <th>Title</th>
+        <th>Original URL</th>
+        <th>Clicks</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-<div class="list-header">
-  <span>Short Link</span>
-  <span>Title</span>
-  <span>Original URL</span>
-  <span>Clicks</span>
-  <span>Status</span>
-  <span>Actions</span>
+    <tbody>
+      {% for url in urls %}
+      <tr>
+
+        <!-- Short link -->
+        <td>
+          <a href="{% url 'redirect' url.short_code %}">
+            {{ url.short_code }}
+          </a>
+        </td>
+
+        <!-- Title -->
+        <td>{{ url.title }}</td>
+
+        <!-- Original URL -->
+        <td>
+          {{ url.original_url }}
+        </td>
+
+        <!-- Click count -->
+        <td>{{ url.click_count }}</td>
+
+        <!-- Status pill -->
+        <td>
+          <span class="status {% if url.is_active %}active{% else %}disabled{% endif %}">
+            {% if url.is_active %}Active{% else %}Disabled{% endif %}
+          </span>
+        </td>
+
+        <!-- Actions -->
+        <td>
+          <!-- Toggle -->
+          <span class="tooltip">
+            <a href="{% url 'toggle' url.id %}"
+               class="icon-btn {% if url.is_active %}active{% endif %}">
+              ⏻
+            </a>
+            <span class="tooltip-text">Activate / Disable</span>
+          </span>
+
+          <!-- Edit -->
+          <span class="tooltip">
+            <a href="{% url 'update' url.id %}" class="icon-btn edit">
+              📝
+            </a>
+            <span class="tooltip-text">Edit</span>
+          </span>
+
+          <!-- Delete -->
+          <span class="tooltip">
+            <a href="{% url 'delete' url.id %}" class="icon-btn delete">
+              🗑
+            </a>
+            <span class="tooltip-text">Delete</span>
+          </span>
+
+          <!-- Copy -->
+          <span class="tooltip">
+            <a class="icon-btn link"
+               data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"
+               onclick="copyToClipboard(this)">
+              🔗
+            </a>
+            <span class="tooltip-text">Copy URL</span>
+          </span>
+        </td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 
-    <!-- ROW -->
-     {%for url in urls%}
-   <div class="list-row">
-  <span class="short">
-    <a href="{% url 'redirect' url.short_code %}">
-      {{ url.short_code }}
-    </a>
-  </span>
-  <span class="title">{{url.title}}</span>
 
-  <span class="original">{{ url.original_url }}</span>
 
-  <span class="clicks">{{ url.click_count }}</span>
-
-  {% if url.is_active %}
-    <span class="status active">Active</span>
-  {% else %}
-    <span class="status inactive">Disabled</span>
-  {% endif %}
-
-  <span class="actions">
-    <a class="toggle-icon {% if url.is_active %}active{% endif %}"
-       href="{% url 'toggle' url.id %}">⏻</a>
-
-    <a href="{% url 'update' url.id %}" class="edit">📝</a>
-
-    <a href="{% url 'delete' url.id %}" class="delete">🗑</a>
-    <a 
-        data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"
-        onclick="copyToClipboard(this)"
-        >🔗</a>
-        
-  </span>
-</div>
-    {%endfor%}
-
-  </section>
  <div class="pagination">
   {% if urls.has_previous %}
     <a class="page-btn prev" href="?page={{ urls.previous_page_number }}">← Previous</a>

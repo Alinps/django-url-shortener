@@ -6,9 +6,8 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at top, rgba(37,99,235,0.12), transparent 60%),
-    #05070d;
+
+  background: radial-gradient(circle at top, #1f2f4d, #05070d);
   color: #e5e7eb;
   min-height: 100vh;
 }
@@ -42,11 +41,11 @@ body {
   text-align: center;
 }
 
-.gradient-text{
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+/*.gradient-text{*/
+/*  background: linear-gradient(90deg, #38bdf8, #a78bfa);*/
+/*  -webkit-background-clip: text;*/
+/*  -webkit-text-fill-color: transparent;*/
+/*}*/
 
 
 /* ICON */
@@ -82,13 +81,22 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
   border: none;
+  transition: transform 0.2s ease;
 }
 
 /* PRIMARY */
-.btn.primary {
-  background: linear-gradient(135deg, #2563eb, #4f46e5);
+.btn.primarys {
+  background: linear-gradient(135deg, #22D3EE, #0EA5E9);
   color: white;
   font-weight: 600;
+}
+
+
+.btn:hover{
+transform:translateY(-2px);
+}
+.btn:active{
+  transform:translateY(2px);
 }
 
 /* CANCEL */
