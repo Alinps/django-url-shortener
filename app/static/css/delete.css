@@ -114,6 +114,7 @@ body {
   background: transparent;
 }
 
+
 /* RESPONSIVE */
 @media (max-width: 600px) {
   .confirm-card {

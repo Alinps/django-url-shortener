@@ -58,14 +58,14 @@
       <span class="label">Total Clicks</span>
       <span class="value">{{total_clicks}}</span>
     </div>
-
+<a href="{%url 'home'%}">
     <div class="stat-card">
-      <span class="label">Create new Short Link</span>
-      <span class="value"><a href="{%url 'home'%}">+</a></span>
+      <span class="label">Create new Short Link ➕ </span>
+      <span class="value"></span>
     </div>
+</a>
   </section>
 
-<div class="table-wrapper">
   <table class="url-table">
     <thead>
       <tr>
@@ -83,32 +83,32 @@
       <tr>
 
         <!-- Short link -->
-        <td>
+        <td data-label="Short Link">
           <a href="{% url 'redirect' url.short_code %}">
             {{ url.short_code }}
           </a>
         </td>
 
         <!-- Title -->
-        <td>{{ url.title }}</td>
+        <td data-label="Title">{{ url.title }}</td>
 
         <!-- Original URL -->
-        <td>
+        <td  data-label="Original URL">
           {{ url.original_url }}
         </td>
 
         <!-- Click count -->
-        <td>{{ url.click_count }}</td>
+        <td  data-label="Clicks">{{ url.click_count }}</td>
 
         <!-- Status pill -->
-        <td>
+        <td data-label="Status">
           <span class="status {% if url.is_active %}active{% else %}disabled{% endif %}">
             {% if url.is_active %}Active{% else %}Disabled{% endif %}
           </span>
         </td>
 
         <!-- Actions -->
-        <td>
+        <td  data-label="Actions">
           <!-- Toggle -->
           <span class="tooltip">
             <a href="{% url 'toggle' url.id %}"
@@ -149,7 +149,7 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
+
 
 
 
