@@ -3,7 +3,7 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
-  font-weight: 400;
+
 }
 
 body {
@@ -387,7 +387,8 @@ a{
 
 
 .url-table {
-  max-width:100%;
+  table-layout: fixed;
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   background: linear-gradient(
@@ -475,6 +476,14 @@ a{
 .url-table td:nth-child(5) {
   font-weight: 500;
 }
+.url-table td:nth-child(1) {
+  max-width: 100px;      /* 👈 control this */
+   display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /*.url-table td:nth-child(5):contains("Active") {*/
 /*  color: #22c55e;*/

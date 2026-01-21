@@ -1,18 +1,51 @@
+{#<nav class="navbar">#}
+{#  <div class="nav-left">#}
+{#    <a href="{% url 'home' %}" class="brand  gradient-text">#}
+{#      🔗 Shortly#}
+{#    </a>#}
+{#  </div>#}
+{##}
+{#  <div class="nav-right">#}
+{#    {% if user.is_authenticated %}#}
+{#      <a href="{%url 'list'%}" class="nav-link">Dashboard</a>#}
+{#      <a href="{%url 'aboutus'%}" class="nav-link">About Us</a>#}
+{#      <a href="{% url 'logout' %}" class="btn ghost">Logout</a>#}
+{#    {% else %}#}
+{#      <a href="{% url 'login' %}" class="nav-link">Login</a>#}
+{#      <a href="{% url 'signup' %}" class="btn primary">Register</a>#}
+{#    {% endif %}#}
+{#  </div>#}
+{#</nav>#}
+
+
 <nav class="navbar">
-  <div class="nav-left">
-    <a href="{% url 'home' %}" class="brand  gradient-text">
-      🔗 Shortly
+  <div class="nav-brand"><a href="{% url 'home' %}" class="brand  gradient-text">🔗 Shortly
     </a>
   </div>
 
-  <div class="nav-right">
-    {% if user.is_authenticated %}
-      <a href="{%url 'list'%}" class="nav-link">Dashboard</a>
-      <a href="{%url 'aboutus'%}" class="nav-link">About Us</a>
-      <a href="{% url 'logout' %}" class="btn ghost">Logout</a>
+  <button class="hamburger" aria-label="Toggle menu">
+    ☰
+  </button>
+
+  <ul class="nav-links">
+      {% if user.is_authenticated %}
+          <li><a href="{%url 'list'%}" class="nav-link">Dashboard</a></li>
+          <li><a href="{%url 'aboutus'%}" class="nav-link">About Us</a></li>
+          <li><a href="{% url 'logout' %}" class="btn ghost">Logout</a></li>
     {% else %}
-      <a href="{% url 'login' %}" class="nav-link">Login</a>
-      <a href="{% url 'signup' %}" class="btn primary">Register</a>
+          <li><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+          <li><a href="{% url 'signup' %}" class="btn primary">Register</a></li>
     {% endif %}
-  </div>
+  </ul>
 </nav>
+
+<script>
+  const hamburger = document.querySelector(".hamburger");
+  const navLinks = document.querySelector(".nav-links");
+
+  hamburger.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+  });
+</script>
+
+

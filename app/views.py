@@ -1,3 +1,5 @@
+from django.db.utils import DataError
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
@@ -15,6 +17,7 @@ from .utils import generate_otp,send_reset_otp
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
+
 # Create your views here.
 
 
@@ -67,20 +70,29 @@ def logout_user(request):
 @login_required
 @csrf_protect
 def home_page(request):
-    if request.method=='POST':
+    if request.method == 'POST':
         original_url = request.POST.get("original_url")
-        title=request.POST.get("title")
-        print(title)
-        short_code=short_code_generator()
-        print(short_code)
-        ShortURL.objects.create(
-            user=request.user,
-            original_url=original_url,
-            short_code=short_code,
-            title=title
-        )
-        return redirect("list")
-    return render(request,"home.html")
+        title = request.POST.get("title")
+        short_code = short_code_generator()
+
+        try:
+            ShortURL.objects.create(
+                user=request.user,
+                original_url=original_url,
+                short_code=short_code,
+                title=title
+            )
+            messages.success(request, "URL shortened successfully")
+            return redirect("list")
+
+        except DataError:
+            messages.error(
+                request,
+                "The URL is too long. Please enter a shorter or valid URL."
+            )
+            return redirect("home")   # ✅ FIX HERE
+
+    return render(request, "home.html")
 
 @never_cache
 @login_required
