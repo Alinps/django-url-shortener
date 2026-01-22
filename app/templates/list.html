@@ -81,7 +81,7 @@
         <tbody>
 
           {% for url in urls %}
-          <tr>
+          <tr id="row-{{ url.id }}">
 
             <!-- Short link -->
             <td data-label="Short Link">
@@ -91,10 +91,10 @@
             </td>
 
             <!-- Title -->
-            <td data-label="Title">{{ url.title }}</td>
+            <td data-label="Title" class="title">{{ url.title }}</td>
 
             <!-- Original URL -->
-            <td  data-label="Original URL">
+            <td  data-label="Original URL"  class="original">
               {{ url.original_url }}
             </td>
 
@@ -103,7 +103,7 @@
 
             <!-- Status pill -->
             <td data-label="Status">
-              <span class="status {% if url.is_active %}active{% else %}disabled{% endif %}">
+              <span class="status status-pill {% if url.is_active %}active{% else %}disabled{% endif %}">
                 {% if url.is_active %}Active{% else %}Disabled{% endif %}
               </span>
             </td>
@@ -121,17 +121,17 @@
 
               <!-- Edit -->
               <span class="tooltip">
-                <a href="{% url 'update' url.id %}" class="icon-btn edit">
-                  📝
-                </a>
+               <a onclick="openEdit('{{ url.id }}','{{ url.title }}','{{ url.original_url }}','{{ url.is_active }}')" class="icon-btn edit">
+                   📝
+               </a>
+
                 <span class="tooltip-text">Edit</span>
               </span>
 
               <!-- Delete -->
               <span class="tooltip">
-                <a href="{% url 'delete' url.id %}" class="icon-btn delete">
-                  🗑
-                </a>
+               <a onclick="openDelete('{{ url.id }}')" class="icon-btn delete">🗑</a>
+
                 <span class="tooltip-text">Delete</span>
               </span>
 
@@ -184,7 +184,59 @@
   </section>
 
 </main>
+
+<!--edit modal--->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-card">
+    <h2>Edit URL</h2>
+
+    <form id="editForm">
+      {% csrf_token %}
+      <input type="hidden" id="edit-id">
+
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="edit-title">
+      </div>
+
+      <div class="field">
+        <label>Original URL</label>
+        <input type="url" id="edit-url">
+      </div>
+
+       <div class="field">
+            <label>Status</label>
+            <select id="edit-status">
+                <option value="true">Active</option>
+                <option value="false">Disabled</option>
+            </select>
+       </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-cancel" onclick="closeEdit()">Cancel</button>
+        <button type="submit" class="btn btn-save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!--delete modal-->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-card danger">
+    <h2>Delete URL?</h2>
+    <p>This action cannot be undone.</p>
+
+    <div class="modal-actions">
+      <button class="btn modal-ghost" onclick="closeDelete()">Cancel</button>
+      <button class="btn modal-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+
 {%include 'partials/footer.html'%}
+
 <script src="{%static 'js/list.js' %}"></script>
 </body>
 </html>

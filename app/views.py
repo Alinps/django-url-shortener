@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
+from django.http import JsonResponse
+import json
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
@@ -119,29 +121,57 @@ def list_url(request):
         "disabled_urls":disabled_urls
         })
 
-@never_cache
-@login_required
-def update_url(request,ids):
-    url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
-    if request.method=="POST":
-        new_url=request.POST.get("original_url")
-        new_status=request.POST.get("status")
-        new_title=request.POST.get("title")
-        url_obj.original_url=new_url
-        url_obj.is_active=new_status
-        url_obj.title=new_title
-        url_obj.save()
-        return redirect("list")
-    return render(request,"edit.html",{"url":url_obj})
 
-@never_cache
-@login_required
-def delete_url(request,ids):
-    url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
+
+def update_url(request,id):
+    if request.method=="POST":
+        data=json.loads(request.body)
+        url=get_object_or_404(ShortURL,id=id,user=request.user)
+
+        url.title=data["title"]
+        url.original_url=data["original_url"]
+        url.is_active=data["is_active"]=="true"
+        url.save()
+
+        return JsonResponse({
+            "success":True,
+            "title":url.title,
+            "original_url":url.original_url,
+            "is_active":url.is_active
+        })
+    return None
+
+
+# @never_cache
+# @login_required
+# def update_url(request,ids):
+#     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
+#     if request.method=="POST":
+#         new_url=request.POST.get("original_url")
+#         new_status=request.POST.get("status")
+#         new_title=request.POST.get("title")
+#         url_obj.original_url=new_url
+#         url_obj.is_active=new_status
+#         url_obj.title=new_title
+#         url_obj.save()
+#         return redirect("list")
+#     return render(request,"edit.html",{"url":url_obj})
+
+# @never_cache
+# @login_required
+# def delete_url(request,ids):
+#     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
+#     if request.method=='POST':
+#         url_obj.delete()
+#         return redirect("list")
+#     return render(request,"delete.html",{'url':url_obj})
+
+def delete_url(request,id):
     if request.method=='POST':
-        url_obj.delete()
-        return redirect("list")
-    return render(request,"delete.html",{'url':url_obj})
+        ShortURL.objects.filter(id=id).delete()
+        return JsonResponse({"success":True})
+    return None
+
 
 def redirect_url(request,short_code):
     url=get_object_or_404(ShortURL,short_code=short_code)

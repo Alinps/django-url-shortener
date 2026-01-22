@@ -510,6 +510,167 @@ a{
   align-items: center;
 }
 
+/*edit and delete modal css*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 30, 0.75);
+  backdrop-filter: blur(6px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #2b2255;
+  border-radius: 18px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+}
+
+.modal-card h2 {
+  margin-bottom: 1rem;
+}
+
+.modal-card p {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.modal-card.danger {
+  border-color: rgba(239,68,68,0.4);
+}
+
+.modal-ghost{
+  color: navy;
+}
+.modal-danger{
+  background-color: red;
+  color:white;
+}
+
+/*modal field and form styling Field wrapper */
+.field {
+  margin: 1.2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Labels */
+.field label {
+  font-size: 0.85rem;
+  color: #aab0ff;
+  letter-spacing: 0.3px;
+}
+
+/* Inputs & select */
+.field input,
+.field select {
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+/* Placeholder color */
+.field input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Focus effect */
+.field input:focus,
+.field select:focus {
+  border-color: #6c7cff;
+  box-shadow: 0 0 0 3px rgba(108, 124, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/*modal container (glass effect polish)*/
+.modal {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 40, 70, 0.95),
+    rgba(8, 10, 20, 0.95)
+  );
+  border-radius: 20px;
+  padding: 2rem;
+  width: 420px;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+
+.modal h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+
+/*modal action button (cancel and save)*/
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+/* Cancel button */
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #444aa7;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Save button */
+.btn-save {
+  background: linear-gradient(135deg, #4f6dff, #6c7cff);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(108, 124, 255, 0.4);
+}
+
+.btn-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(108, 124, 255, 0.55);
+}
+
+/*micro-interaction*/
+.field input:hover,
+.field select:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
 
 
 
