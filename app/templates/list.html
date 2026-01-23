@@ -35,6 +35,7 @@
                         placeholder="Search by title, short link or URL…"
                         value="{{ request.GET.q }}"
                         />
+                    <ul id="suggestions" class="suggestions"></ul>
                 </label>
             </form>
       </div>
@@ -78,7 +79,7 @@
           </tr>
         </thead>
 
-        <tbody>
+        <tbody id="url-table-body">
 
           {% for url in urls %}
           <tr id="row-{{ url.id }}">

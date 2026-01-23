@@ -128,4 +128,91 @@ function confirmDelete() {
 }
 
 
+//ajax search logic
+const searchInput = document.getElementById("search-input");
+const suggestionsBox = document.getElementById("suggestions");
+const tableBody = document.getElementById("url-table-body");
 
+let debounceTimer;
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+
+  debounceTimer = setTimeout(() => {
+    const query = searchInput.value.trim();
+
+    if (!query) {
+      suggestionsBox.innerHTML = "";
+      return;
+    }
+
+    fetch(`/search/?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        renderSuggestions(data.results);
+        renderTableRows(data.results);
+      });
+  }, 300);
+});
+
+function renderSuggestions(results) {
+  suggestionsBox.innerHTML = "";
+
+  results.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item.title;
+    li.onclick = () => {
+      searchInput.value = item.title;
+      suggestionsBox.innerHTML = "";
+    };
+    suggestionsBox.appendChild(li);
+  });
+}
+
+function renderTableRows(results) {
+  tableBody.innerHTML = "";
+
+  if (results.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;">No link to show.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  results.forEach(url => {
+    tableBody.innerHTML += `
+      <tr id="row-${url.id}">
+        <td data-label="Short Link">
+          <a href="/redirect/${url.short_code}">
+            ${url.short_code}
+          </a>
+        </td>
+
+        <td data-label="Title" class="title">${url.title}</td>
+
+        <td data-label="Original URL" class="original">
+          ${url.original_url}
+        </td>
+
+        <td data-label="Clicks">${url.click_count}</td>
+
+        <td data-label="Status">
+          <span class="status status-pill ${url.is_active ? "active" : "disabled"}">
+            ${url.is_active ? "Active" : "Disabled"}
+          </span>
+        </td>
+
+        <td data-label="Actions">
+          <a href="/toggle/${url.id}" class="icon-btn">⏻</a>
+          <a onclick="openEdit('${url.id}','${url.title}','${url.original_url}','${url.is_active}')" class="icon-btn edit">📝</a>
+          <a onclick="openDelete('${url.id}')" class="icon-btn delete">🗑</a>
+          <a class="icon-btn link"
+             data-url="${window.location.origin}/redirect/${url.short_code}"
+             onclick="copyToClipboard(this)">🔗</a>
+        </td>
+      </tr>
+    `;
+  });
+}

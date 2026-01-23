@@ -15,5 +15,6 @@ urlpatterns = [
     path("togglestatus/<int:ids>",views.toggle_url_status,name="toggle"),
     path("aboutus/",views.aboutus,name="aboutus"),
     path("forgotpassword/",views.forgot_password,name="forgotpassword"),
-    path("verifyresetotp/",views.verify_reset_otp,name="verify_reset_otp")
+    path("verifyresetotp/",views.verify_reset_otp,name="verify_reset_otp"),
+    path("search/", views.search_urls, name="search_urls"),
 ]

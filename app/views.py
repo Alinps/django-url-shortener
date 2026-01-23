@@ -123,6 +123,34 @@ def list_url(request):
 
 
 
+#ajax search
+# app/views.py
+@login_required
+def search_urls(request):
+    query = request.GET.get("q", "").strip()
+
+    if not query:
+        return JsonResponse({"results": []})
+
+    urls = (
+        ShortURL.objects
+        .filter(user=request.user, title__icontains=query)
+        .values(
+            "id",
+            "title",
+            "original_url",
+            "short_code",
+            "click_count",
+            "is_active",
+        )
+    )
+
+    return JsonResponse({"results": list(urls)})
+
+
+
+
+
 def update_url(request,id):
     if request.method=="POST":
         data=json.loads(request.body)
