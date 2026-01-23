@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   {%load static%}
-  <title>Log out — Shortly</title>
+  <title>Delete Link — Shortly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{%static 'css/logout_confirm.css'%}">
-  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
+  <link rel="stylesheet" href="{% static 'css/delete.css'%}">
+    <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
   <link rel="stylesheet" href="{%static 'css/footer.css'%}">
 </head>
 <body>
@@ -17,34 +17,41 @@
 
   <!-- HEADER -->
   <section class="page-header">
-    <h1>Log out of Shortly?</h1>
+    <h1>Delete Short Link</h1>
     <p class="subtitle">
-      You can log back in anytime to continue managing your links.
+      This action is permanent and cannot be undone.
     </p>
   </section>
 
   <!-- CONFIRM CARD -->
   <section class="confirm-card">
 
-    <div class="icon">🔐</div>
+    <div class="warning-icon">⚠️</div>
 
     <p class="message">
-      Are you sure you want to log out of your account?
+      You are about to permanently delete the following short link:
     </p>
 
+    <div class="link-preview">
+      <span class="short">short.ly/{{url.short_code}}</span>
+      <span class="original">
+        {{url.original_url}}
+      </span>
+    </div>
+
     <p class="note">
-      Your links, analytics, and settings will remain محفوظ and unchanged.
+      All click history and analytics associated with this link will be removed.
     </p>
 
     <form method="post">
        {% csrf_token %} 
 
       <div class="actions">
-        <button type="submit" class="btn primarys">
-          Yes, log me out
+        <button type="submit" class="btn danger">
+          Yes, delete this link
         </button>
         <a href="{%url 'home'%}" class="btn ghost">
-          Stay logged in
+          Cancel
         </a>
       </div>
     </form>

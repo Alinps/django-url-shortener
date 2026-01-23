@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {%load static%}
+  <meta charset="UTF-8">
+  <title>About Us — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{%static 'css/about.css'%}">
+  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
+  <link rel="stylesheet" href="{%static 'css/footer.css'%}">
+</head>
+<body>
+ {%include 'partials/navbar.html'%}
+<main class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="gradient-text">We make links simpler.</h1>
+    <p class="hero-text">
+      Shortly was built to remove friction from sharing links —
+      clean URLs, clear insights, and calm design.
+    </p>
+  </section>
+
+  <!-- WHAT WE DO -->
+  <section class="section two-col">
+    <div class="text">
+      <h2>What we do</h2>
+      <p>
+        Shortly is a modern URL shortening platform designed for people
+        who value clarity over clutter. We help individuals and teams
+        transform long, complex URLs into short, reliable links that are
+        easy to share and easy to track.
+      </p>
+      <p>
+        From personal projects to professional campaigns, Shortly keeps
+        your links organized, accessible, and under control.
+      </p>
+    </div>
+
+    <div class="card">
+      <ul>
+        <li>⚡ Fast link creation</li>
+        <li>🔒 Secure and reliable redirects</li>
+        <li>📊 Meaningful click insights</li>
+        <li>🎯 Clean, distraction-free UI</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section class="section values">
+    <h2>Our principles</h2>
+
+    <div class="value-grid">
+      <div class="value-card">
+        <h3>Simplicity</h3>
+        <p>
+          Software should reduce complexity, not introduce it.
+        </p>
+      </div>
+
+      <div class="value-card">
+        <h3>Trust</h3>
+        <p>
+          Your links are critical. We treat reliability and security as non-negotiable.
+        </p>
+      </div>
+
+      <div class="value-card">
+        <h3>Clarity</h3>
+        <p>
+          Clear data, clear design, clear decisions.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="section story">
+    <h2>Why Shortly exists</h2>
+    <p>
+      We noticed that many link shorteners focused on features but forgot
+      about experience. Dashboards were cluttered, actions felt heavy,
+      and simple tasks took too much effort.
+    </p>
+    <p>
+      Shortly was created to be different — thoughtful design, purposeful
+      features, and a workflow that respects your time.
+    </p>
+  </section>
+
+  <!-- VISION -->
+  <section class="section highlight">
+    <h2>Looking ahead</h2>
+    <p>
+      Our vision is to become a calm, dependable layer between your
+      content and your audience — where every link feels intentional.
+    </p>
+    <p>
+      We believe productivity tools should feel invisible, not overwhelming.
+    </p>
+  </section>
+
+</main>
+{%include 'partials/footer.html'%}
+</body>
+</html>

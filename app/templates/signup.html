@@ -1,104 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <title>Create Account — Shortly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+  <link rel="stylesheet" href="{% static 'css/footer.css'%}">
 </head>
 <body>
-    <div class="container">
-        <div class="d-flex justify-content-center align-items-center vh-100">
-            <div class="card shadow w-50 py-4">
-                <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
 
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
-                        </div>
-                    {% endif %}
-                    
-                    <h3 class="card-title mb-3">Sign Up</h3>
-                    <form method="POST" novalidate>
-                        {% csrf_token %}
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                {{ form.first_name }}
-                                {% if form.first_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.first_name.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.last_name }}
-                                {% if form.last_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.last_name.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col">
-                                {{ form.username }}
-                                {% if form.username.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.username.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col">
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.email.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col">
-                                {{ form.password1 }}
-                                {% if form.password1.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.password1.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col">
-                                {{ form.password2 }}
-                                {% if form.password2.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.password2.errors|striptags }}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
-                    </form>
-                </div>
-            </div>
+<div class="page">
+  <div class="signup-card">
+
+    <h1 class="gradient-text">Create your account</h1>
+    <p class="subtitle">
+      Start shortening links with clarity and control.
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- NON FIELD ERRORS -->
+      {% if form.non_field_errors %}
+        <div class="error-box">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
         </div>
-    </div>
+      {% endif %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+      <!-- USERNAME -->
+      <div class="field">
+        <label>Username</label>
+        {{ form.username }}
+        {% for error in form.username.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <!-- EMAIL -->
+      <div class="field">
+        <label>Email</label>
+        {{ form.email }}
+        {% for error in form.email.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <!-- PASSWORD 1 -->
+      <div class="field">
+        <label>Password</label>
+      <div class="password-wrapper">
+        {{ form.password1 }}
+          <span class="toggle-password">
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+          </span>
+      </div>
+        {% for error in form.password1.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <!-- PASSWORD 2 -->
+      <div class="field">
+        <label>Confirm Password</label>
+      <div class="password-wrapper">
+        {{ form.password2 }}
+          <span class="toggle-password">
+              <svg viewBox="0 0 24 24" class="eye-icon">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+          </span>
+      </div>
+        {% for error in form.password2.errors %}
+          <span class="error">{{ error }}</span>
+        {% endfor %}
+      </div>
+
+      <button type="submit">Create Account</button>
+    </form>
+
+    <p class="footer-text">
+      Already have an account?
+      <a href="{% url 'login' %}">Login</a>
+    </p>
+
+   
+
+  </div>
+
+</div>
+ {%include 'partials/footer.html'%}
+<script src="{% static "js/signup.js" %}"></script>
 </body>
 </html>

@@ -1,0 +1,122 @@
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(23, 33, 60, 0.75);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #1f2937;
+}
+.gradient-text{
+ background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
+}
+/* BRAND */
+.nav-brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.nav-brand a {
+  text-decoration: none;
+}
+
+/* LINKS CONTAINER */
+.nav-links {
+  display: flex;              /* 🔑 REQUIRED */
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+/* INDIVIDUAL LINKS */
+.nav-link {
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+}
+
+/* BUTTONS */
+.btn {
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  color: #fff;
+}
+
+.btn.ghost {
+  border: 1px solid #374151;
+  color: #e5e7eb;
+}
+
+/* HAMBURGER */
+.hamburger {
+  display: none;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+
+  .hamburger {
+    display: block;
+  }
+
+  /* 🔴 MENU HIDDEN STATE */
+  .nav-links {
+    position: absolute;
+    top: 64px;
+    right: 1rem;
+    width: 220px;
+
+    flex-direction: column;
+    align-items: flex-start;
+
+    background: rgba(15, 23, 42, 0.95);
+    padding: 1rem;
+    border-radius: 12px;
+
+    display: none;
+
+    /* 👇 INSERT THESE */
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  /* 🟢 MENU VISIBLE STATE */
+  .nav-links.active {
+    display: flex;
+
+    /* 👇 AND THESE */
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .nav-brand {
+    font-size: 1.1rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+  }
+}
+

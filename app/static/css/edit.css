@@ -1,0 +1,127 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+   background: radial-gradient(circle at top, #1f2f4d, #05070d);
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* PAGE */
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* HEADER */
+.page-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* CARD */
+.edit-card {
+  margin-top: 2.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+  padding: 2.8rem;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+}
+
+/* FIELD */
+.field {
+  margin-bottom: 1.6rem;
+}
+
+label {
+  display: block;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-bottom: 0.4rem;
+}
+.gradient-text{
+  background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
+}
+
+input,
+select {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: #141924;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  color: #e5e7eb;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+input:focus,
+select:focus {
+  border-color: #0c9fa6;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.3);
+}
+
+input[readonly] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.btn {
+  padding: 0.7rem 1.5rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+   transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+.btn:hover {
+  box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
+}
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn.edit-primary {
+  background: linear-gradient(135deg, #22D3EE, #0EA5E9);
+  color: #042F2E;
+  font-weight: 600;
+}
+
+.btn.ghost {
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  background: transparent;
+}
+
+/* NOTE */
+.note {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}

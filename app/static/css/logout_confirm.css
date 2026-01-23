@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #1f2f4d, #05070d);
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* PAGE */
+.page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* HEADER */
+.page-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+/* CARD */
+.confirm-card {
+  margin-top: 2.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1f2937;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+/*.gradient-text{*/
+/*  background: linear-gradient(90deg, #38bdf8, #a78bfa);*/
+/*  -webkit-background-clip: text;*/
+/*  -webkit-text-fill-color: transparent;*/
+/*}*/
+
+
+/* ICON */
+.icon {
+  font-size: 2.3rem;
+  margin-bottom: 1rem;
+}
+
+/* TEXT */
+.message {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.note {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-bottom: 2.5rem;
+}
+
+/* ACTIONS */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s ease;
+}
+
+/* PRIMARY */
+.btn.primarys {
+  background: linear-gradient(135deg, #22D3EE, #0EA5E9);
+  color: white;
+  font-weight: 600;
+}
+
+
+.btn:hover{
+transform:translateY(-2px);
+}
+.btn:active{
+  transform:translateY(2px);
+}
+
+/* CANCEL */
+.btn.ghost {
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  background: transparent;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .confirm-card {
+    padding: 2.2rem;
+  }
+}
