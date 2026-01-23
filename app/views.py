@@ -129,9 +129,6 @@ def list_url(request):
 def search_urls(request):
     query = request.GET.get("q", "").strip()
 
-    if not query:
-        return JsonResponse({"results": []})
-
     urls = (
         ShortURL.objects
         .filter(user=request.user, title__icontains=query)
