@@ -32,11 +32,11 @@ const searchInput = searchForm.querySelector("input");
 
 
 //logic for edit modal
-function openEdit(id, title, url,isActive) {
+function openEdit(id, title, url) {
   document.getElementById("edit-id").value = id;
   document.getElementById("edit-title").value = title;
   document.getElementById("edit-url").value = url;
-  document.getElementById("edit-status").value = isActive === "True" ? "true" : "false";
+  // document.getElementById("edit-status").value = isActive === "True" ? "true" : "false";
 
   document.getElementById("editModal").style.display = "flex";
 }
@@ -60,7 +60,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
     body: JSON.stringify({
       title: document.getElementById("edit-title").value,
       original_url: document.getElementById("edit-url").value,
-      is_active: document.getElementById("edit-status").value
+      // is_active: document.getElementById("edit-status").value
     })
   })
   .then(res => res.json())
@@ -83,17 +83,17 @@ function updateRowUI(id, data) {
   row.querySelector(".original").textContent = data.original_url;
 
   // Update status pill
-  const statusSpan = row.querySelector(".status-pill");
+  // const statusSpan = row.querySelector(".status-pill");
 
-  if (data.is_active) {
-    statusSpan.textContent = "Active";
-    statusSpan.classList.remove("disabled");
-    statusSpan.classList.add("active");
-  } else {
-    statusSpan.textContent = "Disabled";
-    statusSpan.classList.remove("active");
-    statusSpan.classList.add("disabled");
-  }
+  // if (data.is_active) {
+  //   statusSpan.textContent = "Active";
+  //   statusSpan.classList.remove("disabled");
+  //   statusSpan.classList.add("active");
+  // } else {
+  //   statusSpan.textContent = "Disabled";
+  //   statusSpan.classList.remove("active");
+  //   statusSpan.classList.add("disabled");
+  // }
 }
 
 
@@ -119,9 +119,14 @@ function confirmDelete() {
   })
   .then(res => res.json())
   .then(data => {
+    console.log(data);
     if (data.success) {
       document.getElementById("deleteModal").style.display = "none";
       document.getElementById(`row-${deleteId}`).remove();
+      document.getElementById("active_urls").textContent=data.active_urls;
+      document.getElementById("disabled_urls").textContent=data.disabled_urls;
+      document.getElementById("total_urls").textContent=data.total_urls;
+
 
     }
   });

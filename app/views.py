@@ -5,7 +5,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
 from django.http import JsonResponse
 import json
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
@@ -147,7 +146,7 @@ def search_urls(request):
 
 
 
-
+@login_required
 def update_url(request,id):
     if request.method=="POST":
         data=json.loads(request.body)
@@ -155,14 +154,12 @@ def update_url(request,id):
 
         url.title=data["title"]
         url.original_url=data["original_url"]
-        url.is_active=data["is_active"]=="true"
         url.save()
 
         return JsonResponse({
             "success":True,
             "title":url.title,
             "original_url":url.original_url,
-            "is_active":url.is_active
         })
     return None
 
@@ -191,10 +188,17 @@ def update_url(request,id):
 #         return redirect("list")
 #     return render(request,"delete.html",{'url':url_obj})
 
+@login_required
 def delete_url(request,id):
     if request.method=='POST':
+        url=ShortURL.objects.filter(user=request.user)
         ShortURL.objects.filter(id=id).delete()
-        return JsonResponse({"success":True})
+        return JsonResponse({
+            "success":True,
+            "total_urls":url.count(),
+            "active_urls":url.filter(is_active=True).count(),
+            "disabled_urls":url.filter(is_active=False).count()
+        })
     return None
 
 
