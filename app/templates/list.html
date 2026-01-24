@@ -104,7 +104,7 @@
 
             <!-- Status pill -->
             <td data-label="Status">
-              <span class="status status-pill {% if url.is_active %}active{% else %}disabled{% endif %}">
+              <span class="status status-pill {% if url.is_active %}active{% else %}disabled{% endif %}" id="toggleStatus">
                 {% if url.is_active %}Active{% else %}Disabled{% endif %}
               </span>
             </td>
@@ -113,8 +113,9 @@
             <td  data-label="Actions">
               <!-- Toggle -->
               <span class="tooltip">
-                <a href="{% url 'toggle' url.id %}"
-                   class="icon-btn {% if url.is_active %}active{% endif %}">
+                <a
+                   class="icon-btn {% if url.is_active %}active{% endif %}"
+                    onclick="toggleStatus('{{ url.id }}')">
                   ⏻
                 </a>
                 <span class="tooltip-text">Activate / Disable</span>

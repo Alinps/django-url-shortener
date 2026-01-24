@@ -245,3 +245,27 @@ searchInput.addEventListener("keydown", (e) => {
   }
 });
 
+function toggleStatus(id){
+  fetch(`/togglestatusajax/${id}`,{
+    method: "POST",
+    headers: {
+      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+    }})
+      .then(res => res.json())
+      .then(data =>{
+        if (data.status){
+          document.getElementById('toggleStatus').textContent = "Active";
+          document.getElementById('toggleStatus').classList.add("active");
+          document.getElementById('toggleStatus').classList.remove("disabled");
+          document.getElementById('active_urls').textContent = data.active_url;
+          document.getElementById('disabled_urls').textContent = data.disabled_url;
+        }
+        else{
+          document.getElementById('toggleStatus').textContent = "Disabled";
+          document.getElementById('toggleStatus').classList.remove("active");
+           document.getElementById('toggleStatus').classList.add("disabled");
+          document.getElementById('active_urls').textContent = data.active_url;
+          document.getElementById('disabled_urls').textContent = data.disabled_url;
+        }
+      })
+}

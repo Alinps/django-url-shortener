@@ -218,6 +218,18 @@ def toggle_url_status(request,ids):
     url.save(update_fields=["is_active"])
     return redirect("list")
 
+def toggle_url_ajax(request,id):
+    if request.method == 'POST':
+        url=get_object_or_404(ShortURL,id=id,user=request.user)
+        url.is_active=not url.is_active
+        url.save(update_fields=["is_active"])
+        return JsonResponse({
+        'status':url.is_active,
+        'active_url':ShortURL.objects.filter(user=request.user,is_active=True).count(),
+        'disabled_url':ShortURL.objects.filter(user=request.user, is_active=False).count()
+        })
+
+
 
 
 def aboutus(request):
