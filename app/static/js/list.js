@@ -84,7 +84,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
 //update the ui
 function updateRowUI(id, data) {
   const row = document.getElementById(`card-${id}`);
-  const shortUrl = `${BASE_URL}/redirect/${data.custom_url}`;
+  const shortUrl = `${BASE_URL}/${data.custom_url}`;
   const shortUrlEl = document.getElementById(`short-url-${id}`);
 
   // Update title & URL

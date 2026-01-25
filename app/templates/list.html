@@ -81,8 +81,8 @@
 
     <!-- URLs -->
     <div class="cell cell-links">
-      <a href="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}" id="short-url-{{ url.id }}" target="_blank">
-        {{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}
+      <a href="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}" id="short-url-{{ url.id }}" target="_blank">
+        {{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}
       </a>
       <span class="original-url original">{{ url.original_url }}</span>
     </div>
@@ -124,7 +124,7 @@
 {#            onclick="copyToClipboard(this)">📋</span>#}
 
       <a class="icon-btn share"
-        data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"
+        data-url="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}"
          onclick="openShare({{ url.id }})">
         <img src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff" width="20px" height="20px">
       </a>
