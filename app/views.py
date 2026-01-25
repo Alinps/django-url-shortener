@@ -314,3 +314,22 @@ def url_click_stats(request,url_id):
         "total_clicks":total_clicks
     })
 
+
+
+@login_required
+def dashboard_stats(request):
+    urls = ShortURL.objects.filter(user=request.user)
+
+    total_clicks = urls.aggregate(
+        total=Sum("click_count")
+    )["total"] or 0
+
+    url_stats = {
+        url.id: url.click_count
+        for url in urls
+    }
+
+    return JsonResponse({
+        "total_clicks": total_clicks,
+        "urls": url_stats
+    })

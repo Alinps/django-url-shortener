@@ -366,32 +366,30 @@ function copyShareLink() {
 
 
 //url click count status increment
-function updateClickCount(urlId){
-  fetch(`/urlclickstatus/${urlId}/`)
-      .then(res=>res.json())
-      .then(data=>{
+//
 
-        //update per-URL click
-        const urlEL=document.getElementById(`click-count-${urlId}`);
-        if (urlEL){
-          urlEL.innerText=data.click_count;
+function updateDashboardStats() {
+  fetch("/dashboard/stats/")
+    .then(res => res.json())
+    .then(data => {
+      // Update total clicks
+      const totalEl = document.getElementById("total");
+      if (totalEl) {
+        totalEl.innerText = data.total_clicks;
+      }
+
+      // Update each URL click count
+      for (const [urlId, clickCount] of Object.entries(data.urls)) {
+        const el = document.getElementById(`click-count-${urlId}`);
+        if (el) {
+          el.innerText = clickCount;
         }
-        //update total clicks
-        const totalEl=document.getElementById("total");
-        if(totalEl){
-          totalEl.innerText=data.total_clicks;
-        }
-      })
-      .catch(err=>{
-        console.error("Stats update failed",err);
-      });
+      }
+    })
+    .catch(err => {
+      console.error("Dashboard polling failed", err);
+    });
 }
 
-function startClickPolling(){
-  const elements=document.querySelectorAll(".click-count");
-  elements.forEach(el=>{
-    const urlId=el.dataset.urlId;
-    updateClickCount(urlId);
-  })
-}
-setInterval(startClickPolling,5000);
+// Poll every 5 seconds
+setInterval(updateDashboardStats, 5000);
