@@ -81,8 +81,8 @@
 
     <!-- URLs -->
     <div class="cell cell-links">
-      <a href="{% url 'redirect' url.short_code %}" class="short-link">
-        {{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}
+      <a href="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}" id="short-url-{{ url.id }}" target="_blank">
+        {{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}
       </a>
       <span class="original-url original">{{ url.original_url }}</span>
     </div>
@@ -114,7 +114,7 @@
             onclick="toggleStatus('{{ url.id }}')">⏻</span>
 
       <span class="icon-btn edit"
-            onclick="openEdit('{{ url.id }}','{{ url.title }}','{{ url.original_url }}')">📝</span>
+            onclick="openEdit('{{ url.id }}','{{ url.title }}','{{ url.original_url }}','{{ url.short_code }}')">📝</span>
 
       <span class="icon-btn delete"
             onclick="openDelete('{{ url.id }}')">🗑</span>
@@ -125,7 +125,7 @@
 
       <a class="icon-btn share"
         data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"
-        onclick="openShare(this)">
+         onclick="openShare({{ url.id }})">
         <img src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff" width="20px" height="20px">
       </a>
 
@@ -188,13 +188,10 @@
         <input type="url" id="edit-url">
       </div>
 
-{#       <div class="field">#}
-{#            <label>Status</label>#}
-{#            <select id="edit-status">#}
-{#                <option value="true">Active</option>#}
-{#                <option value="false">Disabled</option>#}
-{#            </select>#}
-{#       </div>#}
+       <div class="field">
+            <label>Custom URL</label>
+            <input type="text" id="edit-short_code">
+       </div>
 
       <div class="modal-actions">
         <button type="button" class="btn btn-cancel" onclick="closeEdit()">Cancel</button>
@@ -265,7 +262,9 @@
 
 
 {%include 'partials/footer.html'%}
-
+<script>
+  const BASE_URL = "{{ request.scheme }}://{{ request.get_host }}";
+</script>
 <script src="{%static 'js/list.js' %}"></script>
 </body>
 </html>

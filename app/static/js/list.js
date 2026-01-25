@@ -32,10 +32,11 @@ const searchInput = searchForm.querySelector("input");
 
 
 //logic for edit modal
-function openEdit(id, title, url) {
+function openEdit(id, title, url,short_code) {
   document.getElementById("edit-id").value = id;
   document.getElementById("edit-title").value = title;
   document.getElementById("edit-url").value = url;
+  document.getElementById("edit-short_code").value = short_code
   // document.getElementById("edit-status").value = isActive === "True" ? "true" : "false";
 
   document.getElementById("editModal").style.display = "flex";
@@ -60,6 +61,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
     body: JSON.stringify({
       title: document.getElementById("edit-title").value,
       original_url: document.getElementById("edit-url").value,
+      custom_code:document.getElementById("edit-short_code").value,
       // is_active: document.getElementById("edit-status").value
     })
   })
@@ -72,7 +74,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
 
     }
     else{
-       showToast("Failed to update URL", "error");
+       showToast(`Failed to update URL, ${data.message}` , "error");
     }
   });
 });
@@ -82,10 +84,14 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
 //update the ui
 function updateRowUI(id, data) {
   const row = document.getElementById(`card-${id}`);
+  const shortUrl = `${BASE_URL}/redirect/${data.custom_url}`;
+  const shortUrlEl = document.getElementById(`short-url-${id}`);
 
   // Update title & URL
   row.querySelector(".title").textContent = data.title;
   row.querySelector(".original").textContent = data.original_url;
+  shortUrlEl.href = shortUrl;
+  shortUrlEl.innerHTML = shortUrl;
 
   // Update status pill
   // const statusSpan = row.querySelector(".status-pill");
@@ -337,10 +343,15 @@ function toggleStatus(id) {
 
 
 //share modal logic
-let activeShareUrl = "";
+let activeUrlId = null;
 
-function openShare(el) {
-  activeShareUrl = el.dataset.url;
+function openShare(urlId) {
+  activeUrlId = urlId;
+
+  const linkEl = document.getElementById(`short-url-${urlId}`);
+  if (!linkEl) return;
+
+  const activeShareUrl = linkEl.href;
   const encoded = encodeURIComponent(activeShareUrl);
 
   document.getElementById("share-whatsapp").href =
@@ -359,16 +370,23 @@ function openShare(el) {
   document.getElementById("share-card").classList.remove("hidden");
 }
 
+
 function closeShare() {
   document.getElementById("share-overlay").classList.add("hidden");
   document.getElementById("share-card").classList.add("hidden");
 }
 
 function copyShareLink() {
-  navigator.clipboard.writeText(activeShareUrl);
+  if (!activeUrlId) return;
+
+  const linkEl = document.getElementById(`short-url-${activeUrlId}`);
+  if (!linkEl) return;
+
+  navigator.clipboard.writeText(linkEl.href);
   closeShare();
-  alert("Link copied to clipboard");
+  showToast("Link copied 📋", "success");
 }
+
 
 
 //url click count status increment

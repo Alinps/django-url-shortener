@@ -175,12 +175,35 @@ def update_url(request,id):
 
         url.title=data["title"]
         url.original_url=data["original_url"]
-        url.save()
+        custom_code=data["custom_code"]
+        if custom_code:
+            if not is_valid_custom_code(custom_code):
 
+                return JsonResponse({
+                    "success":False,
+                    "message":"Invalid Custom URL formal"
+                })
+
+            if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
+
+                return JsonResponse({
+                    "sucess":False,
+                    "message":"Custom URL already exists"
+                })
+
+            short_code = custom_code
+        else:
+            while True:
+                short_code = short_code_generator()
+                if not ShortURL.objects.filter(short_code=short_code).exists():
+                    break
+        url.short_code=short_code
+        url.save()
         return JsonResponse({
             "success":True,
             "title":url.title,
             "original_url":url.original_url,
+            "custom_url":url.short_code
         })
     return None
 
