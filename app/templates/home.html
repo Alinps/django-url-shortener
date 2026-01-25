@@ -31,6 +31,7 @@
             {% endfor %}
         {% endif %}
 
+
       <form method="POST">
         {% csrf_token %}
         <div>
@@ -50,6 +51,15 @@
             required
           >
         </div>
+
+          <input
+            type="text"
+            name="custom_code"
+            placeholder="Custom short URL (optional)"
+            pattern="[a-zA-Z0-9_-]{3,20}"
+            title="3–20 characters, letters, numbers, - or _"
+          />
+
 
         <button type="submit" class="primary-btn">
           Create Short Link

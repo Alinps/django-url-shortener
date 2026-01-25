@@ -8,7 +8,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
-from .utils import short_code_generator
+from .utils import short_code_generator, is_valid_custom_code
 from .models import ShortURL
 from django.db.models import F
 from django.views.decorators.csrf import csrf_protect
@@ -18,6 +18,8 @@ from .utils import generate_otp,send_reset_otp
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
+from django.db import DataError, IntegrityError
+import traceback
 
 # Create your views here.
 
@@ -74,7 +76,26 @@ def home_page(request):
     if request.method == 'POST':
         original_url = request.POST.get("original_url")
         title = request.POST.get("title")
-        short_code = short_code_generator()
+        custom_code = request.POST.get("custom_code", "").strip()
+
+        print("CUSTOM_CODE:", custom_code)
+
+        # Decide short_code
+        if custom_code:
+            if not is_valid_custom_code(custom_code):
+                messages.error(request, "Invalid short URL format")
+                return redirect("home")
+
+            if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
+                messages.error(request, "Short URL already exists")
+                return redirect("home")
+
+            short_code = custom_code
+        else:
+            while True:
+                short_code = short_code_generator()
+                if not ShortURL.objects.filter(short_code=short_code).exists():
+                    break
 
         try:
             ShortURL.objects.create(
@@ -91,8 +112,7 @@ def home_page(request):
                 request,
                 "The URL is too long. Please enter a shorter or valid URL."
             )
-            return redirect("home")   # ✅ FIX HERE
-
+            return redirect("home")
     return render(request, "home.html")
 
 @never_cache
@@ -138,6 +158,7 @@ def search_urls(request):
             "short_code",
             "click_count",
             "is_active",
+            "created_at"
         )
     )
 

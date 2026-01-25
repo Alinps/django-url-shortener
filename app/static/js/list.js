@@ -76,7 +76,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
 
 //update the ui
 function updateRowUI(id, data) {
-  const row = document.getElementById(`row-${id}`);
+  const row = document.getElementById(`card-${id}`);
 
   // Update title & URL
   row.querySelector(".title").textContent = data.title;
@@ -122,7 +122,7 @@ function confirmDelete() {
     console.log(data);
     if (data.success) {
       document.getElementById("deleteModal").style.display = "none";
-      document.getElementById(`row-${deleteId}`).remove();
+      document.getElementById(`card-${deleteId}`).remove();
       document.getElementById("active_urls").textContent=data.active_urls;
       document.getElementById("disabled_urls").textContent=data.disabled_urls;
       document.getElementById("total_urls").textContent=data.total_urls;
@@ -134,37 +134,68 @@ function confirmDelete() {
 
 
 //ajax search logic
+// ========================
+// DOM ELEMENTS
+// ========================
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric"
+  });
+}
+
 
 const suggestionsBox = document.getElementById("suggestions");
-const tableBody = document.getElementById("url-table-body");
+const urlCardContainer = document.getElementById("urlCardContainer");
 
 let debounceTimer;
 
+// Store original cards (Django-rendered)
+const originalCardsHTML = urlCardContainer.innerHTML;
+
+
+// ========================
+// SEARCH INPUT HANDLER
+// ========================
 searchInput.addEventListener("input", () => {
   clearTimeout(debounceTimer);
 
   debounceTimer = setTimeout(() => {
     const query = searchInput.value.trim();
 
+    // 🔄 Restore original cards when input is empty
     if (!query) {
       suggestionsBox.innerHTML = "";
       suggestionsBox.classList.remove("show");
-
+      urlCardContainer.innerHTML = originalCardsHTML;
+      return;
     }
 
     fetch(`/search/?q=${encodeURIComponent(query)}`)
       .then(res => res.json())
       .then(data => {
         renderSuggestions(data.results);
-        renderTableRows(data.results);
+        renderCards(data.results);
+      })
+      .catch(err => {
+        console.error("Search error:", err);
       });
-  });
+
+  }, 300); // debounce delay
 });
 
+
+// ========================
+// SUGGESTIONS DROPDOWN
+// ========================
 function renderSuggestions(results) {
   suggestionsBox.innerHTML = "";
 
-  if (results.length === 0) {
+  if (!results || results.length === 0) {
     suggestionsBox.classList.remove("show");
     return;
   }
@@ -186,53 +217,79 @@ function renderSuggestions(results) {
 }
 
 
-function renderTableRows(results) {
-  tableBody.innerHTML = "";
+// ========================
+// CARD RENDERING
+// ========================
+function renderCards(results) {
+  urlCardContainer.innerHTML = ""; // 🔥 clear before rendering
 
-  if (results.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center;">No link to show.</td>
-      </tr>
+  if (!results || results.length === 0) {
+    urlCardContainer.innerHTML = `
+      <div class="url-card">
+        <p>No link to show.</p>
+      </div>
     `;
     return;
   }
 
   results.forEach(url => {
-    tableBody.innerHTML += `
-      <tr id="row-${url.id}">
-        <td data-label="Short Link">
-          <a href="/redirect/${url.short_code}">
-            ${url.short_code}
+    urlCardContainer.innerHTML += `
+      <div class="url-card" id="card-${url.id}">
+
+        <!-- Title -->
+        <div class="cell cell-title">
+          <img src="https://www.google.com/s2/favicons?domain=${url.original_url}" alt="">
+          <span>${url.title}</span>
+        </div>
+
+        <!-- URLs -->
+        <div class="cell cell-links">
+          <a href="/redirect/${url.short_code}" class="short-link">
+            ${window.location.origin}/${url.short_code}
           </a>
-        </td>
+          <span class="original-url">${url.original_url}</span>
+        </div>
 
-        <td data-label="Title" class="title">${url.title}</td>
+        <!-- Date -->
+        <div class="cell cell-date">
+          📅 ${formatDate(url.created_at)}
+        </div>
 
-        <td data-label="Original URL" class="original">
-          ${url.original_url}
-        </td>
+        <!-- Clicks -->
+        <div class="cell cell-clicks">
+          👁 ${url.click_count}
+        </div>
 
-        <td data-label="Clicks">${url.click_count}</td>
-
-        <td data-label="Status">
-          <span class="status status-pill ${url.is_active ? "active" : "disabled"}">
+        <!-- Status -->
+        <div class="cell cell-status">
+          <span
+            class="status-pill ${url.is_active ? "active" : "disabled"}"
+            id="toggleStatus_${url.id}">
             ${url.is_active ? "Active" : "Disabled"}
           </span>
-        </td>
+        </div>
 
-        <td data-label="Actions">
-          <a href="/toggle/${url.id}" class="icon-btn">⏻</a>
-          <a onclick="openEdit('${url.id}','${url.title}','${url.original_url}','${url.is_active}')" class="icon-btn edit">📝</a>
-          <a onclick="openDelete('${url.id}')" class="icon-btn delete">🗑</a>
-          <a class="icon-btn link"
-             data-url="${window.location.origin}/redirect/${url.short_code}"
-             onclick="copyToClipboard(this)">🔗</a>
-        </td>
-      </tr>
+        <!-- Actions -->
+        <div class="cell cell-actions">
+          <span class="icon-btn ${url.is_active ? "active" : ""}"
+                onclick="toggleStatus('${url.id}')">⏻</span>
+
+          <span class="icon-btn edit"
+                onclick="openEdit('${url.id}','${url.title}','${url.original_url}')">📝</span>
+
+          <span class="icon-btn delete"
+                onclick="openDelete('${url.id}')">🗑</span>
+
+          <span class="icon-btn copy"
+                data-url="${window.location.origin}/redirect/${url.short_code}"
+                onclick="copyToClipboard(this)">📋</span>
+        </div>
+
+      </div>
     `;
   });
 }
+
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".search-wrapper")) {
     suggestionsBox.classList.remove("show");
@@ -245,27 +302,64 @@ searchInput.addEventListener("keydown", (e) => {
   }
 });
 
-function toggleStatus(id){
-  fetch(`/togglestatusajax/${id}`,{
+function toggleStatus(id) {
+  fetch(`/togglestatusajax/${id}`, {
     method: "POST",
     headers: {
       "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
-    }})
-      .then(res => res.json())
-      .then(data =>{
-        if (data.status){
-          document.getElementById('toggleStatus').textContent = "Active";
-          document.getElementById('toggleStatus').classList.add("active");
-          document.getElementById('toggleStatus').classList.remove("disabled");
-          document.getElementById('active_urls').textContent = data.active_url;
-          document.getElementById('disabled_urls').textContent = data.disabled_url;
-        }
-        else{
-          document.getElementById('toggleStatus').textContent = "Disabled";
-          document.getElementById('toggleStatus').classList.remove("active");
-           document.getElementById('toggleStatus').classList.add("disabled");
-          document.getElementById('active_urls').textContent = data.active_url;
-          document.getElementById('disabled_urls').textContent = data.disabled_url;
-        }
-      })
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const statusEl = document.getElementById(`toggleStatus_${id}`);
+
+    if (data.status) {
+      statusEl.textContent = "Active";
+      statusEl.classList.add("active");
+      statusEl.classList.remove("disabled");
+    } else {
+      statusEl.textContent = "Disabled";
+      statusEl.classList.remove("active");
+      statusEl.classList.add("disabled");
+    }
+
+    document.getElementById('active_urls').textContent = data.active_url;
+    document.getElementById('disabled_urls').textContent = data.disabled_url;
+  });
+}
+
+
+
+//share modal logic
+let activeShareUrl = "";
+
+function openShare(el) {
+  activeShareUrl = el.dataset.url;
+  const encoded = encodeURIComponent(activeShareUrl);
+
+  document.getElementById("share-whatsapp").href =
+    `https://wa.me/?text=${encoded}`;
+
+  document.getElementById("share-x").href =
+    `https://twitter.com/intent/tweet?url=${encoded}`;
+
+  document.getElementById("share-linkedin").href =
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encoded}`;
+
+  document.getElementById("share-facebook").href =
+    `https://www.facebook.com/sharer/sharer.php?u=${encoded}`;
+
+  document.getElementById("share-overlay").classList.remove("hidden");
+  document.getElementById("share-card").classList.remove("hidden");
+}
+
+function closeShare() {
+  document.getElementById("share-overlay").classList.add("hidden");
+  document.getElementById("share-card").classList.add("hidden");
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(activeShareUrl);
+  closeShare();
+  alert("Link copied to clipboard");
 }

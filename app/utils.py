@@ -2,6 +2,7 @@ import string
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+import re
 
 def short_code_generator(length=6):
     short_list=[]
@@ -23,3 +24,16 @@ def send_reset_otp(email,otp):
         recipient_list=[email],
         fail_silently=False,
     )
+
+#custum shortcode validator
+
+
+SHORT_CODE_REGEX = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+RESERVED_CODES = {"admin", "login", "signup", "dashboard", "api"}
+
+def is_valid_custom_code(code: str) -> bool:
+    if not SHORT_CODE_REGEX.match(code):
+        return False
+    if code.lower() in RESERVED_CODES:
+        return False
+    return True
