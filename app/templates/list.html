@@ -57,7 +57,7 @@
     </div>
     <div class="stat-card">
       <span class="label">Total Clicks</span>
-      <span class="value">{{total_clicks}}</span>
+      <span class="value" id="total">{{total_clicks}}</span>
     </div>
 <a href="{%url 'home'%}">
     <div class="stat-card">
@@ -66,98 +66,6 @@
     </div>
 </a>
   </section>
-{#    {% if urls %}#}
-{#      <table class="url-table">#}
-{#        <thead>#}
-{#          <tr>#}
-{#            <th>Short Link</th>#}
-{#            <th>Title</th>#}
-{#            <th>Original URL</th>#}
-{#            <th>Clicks</th>#}
-{#            <th>Status</th>#}
-{#            <th>Actions</th>#}
-{#          </tr>#}
-{#        </thead>#}
-{##}
-{#        <tbody id="url-table-body">#}
-{##}
-{#          {% for url in urls %}#}
-{#          <tr id="row-{{ url.id }}">#}
-{##}
-{#            <!-- Short link -->#}
-{#            <td data-label="Short Link">#}
-{#              <a href="{% url 'redirect' url.short_code %}">#}
-{#                {{ url.short_code }}#}
-{#              </a>#}
-{#            </td>#}
-{##}
-{#            <!-- Title -->#}
-{#            <td data-label="Title" class="title">{{ url.title }}</td>#}
-{##}
-{#            <!-- Original URL -->#}
-{#            <td  data-label="Original URL"  class="original">#}
-{#              {{ url.original_url }}#}
-{#            </td>#}
-{##}
-{#            <!-- Click count -->#}
-{#            <td  data-label="Clicks">{{ url.click_count }}</td>#}
-{##}
-{#            <!-- Status pill -->#}
-{#            <td data-label="Status">#}
-{#              <span class="status status-pill {% if url.is_active %}active{% else %}disabled{% endif %}" id="toggleStatus">#}
-{#                {% if url.is_active %}Active{% else %}Disabled{% endif %}#}
-{#              </span>#}
-{#            </td>#}
-{##}
-{#            <!-- Actions -->#}
-{#            <td  data-label="Actions">#}
-{#              <!-- Toggle -->#}
-{#              <span class="tooltip">#}
-{#                <a#}
-{#                   class="icon-btn {% if url.is_active %}active{% endif %}"#}
-{#                    onclick="toggleStatus('{{ url.id }}')">#}
-{#                  ⏻#}
-{#                </a>#}
-{#                <span class="tooltip-text">Activate / Disable</span>#}
-{#              </span>#}
-{##}
-{#              <!-- Edit -->#}
-{#              <span class="tooltip">#}
-{#               <a onclick="openEdit('{{ url.id }}','{{ url.title }}','{{ url.original_url }}')" class="icon-btn edit">#}
-{#                   📝#}
-{#               </a>#}
-{##}
-{#                <span class="tooltip-text">Edit</span>#}
-{#              </span>#}
-{##}
-{#              <!-- Delete -->#}
-{#              <span class="tooltip">#}
-{#               <a onclick="openDelete('{{ url.id }}')" class="icon-btn delete">🗑</a>#}
-{##}
-{#                <span class="tooltip-text">Delete</span>#}
-{#              </span>#}
-{##}
-{#              <!-- Copy -->#}
-{#              <span class="tooltip">#}
-{#                <a class="icon-btn link"#}
-{#                   data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"#}
-{#                   onclick="copyToClipboard(this)">#}
-{#                  🔗#}
-{#                </a>#}
-{#                <span class="tooltip-text">Copy URL</span>#}
-{#              </span>#}
-{#            </td>#}
-{##}
-{#          </tr>#}
-{#          {% endfor %}#}
-{#        </tbody>#}
-{#      </table>#}
-{#    {% else %}#}
-{#        <p>No link to show.</p>#}
-{#    {% endif %}#}
-
-
-
 
 {% if urls %}
 <div class="url-card-container list-view" id="urlCardContainer">
@@ -186,7 +94,11 @@
 
     <!-- Clicks -->
     <div class="cell cell-clicks">
-      👁 {{ url.click_count }}
+      👁 <span
+            class="click-count"
+            id="click-count-{{ url.id }}"
+            data-url-id="{{ url.id }}"
+        >{{ url.click_count }}</span>
     </div>
 
     <!-- Status -->

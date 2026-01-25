@@ -303,3 +303,14 @@ def verify_reset_otp(request):
         del request.session["reset_email"]
         return redirect("login")
     return render(request,"reset_password.html")
+
+
+def url_click_stats(request,url_id):
+    print(url_id)
+    url=ShortURL.objects.get(id=url_id,user=request.user)
+    total_clicks=ShortURL.objects.filter(user=request.user).aggregate(total=Sum("click_count"))["total"] or 0
+    return JsonResponse({
+        "click_count":url.click_count,
+        "total_clicks":total_clicks
+    })
+
