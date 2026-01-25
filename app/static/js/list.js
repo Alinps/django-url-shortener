@@ -67,7 +67,12 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
   .then(data => {
     if (data.success) {
       updateRowUI(id, data);
+      showToast("URL updated successfully ✨", "success");
       closeEdit();
+
+    }
+    else{
+       showToast("Failed to update URL", "error");
     }
   });
 });
@@ -119,15 +124,16 @@ function confirmDelete() {
   })
   .then(res => res.json())
   .then(data => {
-    console.log(data);
     if (data.success) {
       document.getElementById("deleteModal").style.display = "none";
       document.getElementById(`card-${deleteId}`).remove();
       document.getElementById("active_urls").textContent=data.active_urls;
       document.getElementById("disabled_urls").textContent=data.disabled_urls;
       document.getElementById("total_urls").textContent=data.total_urls;
+      showToast("URL deleted 🗑️", "success");
 
-
+    }else{
+      showToast("Delete failed", "error");
     }
   });
 }
@@ -393,3 +399,26 @@ function updateDashboardStats() {
 
 // Poll every 5 seconds
 setInterval(updateDashboardStats, 5000);
+
+
+
+//toast logic
+function showToast(message, type = "info", duration = 3000) {
+  const container = document.getElementById("toastContainer");
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button class="toast-close">&times;</button>
+  `;
+
+  container.appendChild(toast);
+
+  toast.querySelector(".toast-close").onclick = () => toast.remove();
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
