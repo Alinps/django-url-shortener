@@ -19,5 +19,7 @@ urlpatterns = [
     path("verifyresetotp/",views.verify_reset_otp,name="verify_reset_otp"),
     path("search/", views.search_urls, name="search_urls"),
     path("urlclickstatus/<int:url_id>/",views.url_click_stats,name="url_click_status"),
-    path("dashboard/stats/",views.dashboard_stats,name="dashboard_stats")
+    path("dashboard/stats/",views.dashboard_stats,name="dashboard_stats"),
+    path("analytics/<int:url_id>/", views.analytics_view, name="analytics"),
+
 ]

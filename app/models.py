@@ -23,3 +23,12 @@ class PasswordResetOTP(models.Model):
 
     def is_expired(self):
         return (timezone.now()-self.created_at).seconds>300
+
+
+class ClickEvent(models.Model):
+    short_url = models.ForeignKey(ShortURL, on_delete=models.CASCADE,related_name="click_events")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    user_agent = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Click on {self.short_url.short_code}at {self.timestamp}"

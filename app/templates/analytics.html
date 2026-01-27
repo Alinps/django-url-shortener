@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>Analytics for {{ url.title }}</h2>
+
+<p>Total clicks: {{ total_clicks }}</p>
+
+{% if last_click %}
+  <p>Last clicked: {{ last_click }}</p>
+{% else %}
+  <p>No clicks yet</p>
+{% endif %}
+
+<h3>Clicks per day</h3>
+<ul>
+  {% for item in daily_clicks %}
+    <li>{{ item.day }} → {{ item.count }}</li>
+  {% empty %}
+    <li>No data</li>
+  {% endfor %}
+</ul>
+
+
+</body>
+</html>

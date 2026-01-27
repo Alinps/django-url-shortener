@@ -1,3 +1,4 @@
+from django.db.models.functions import TruncDate
 from django.db.utils import DataError
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -9,8 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from .forms import SignUp,login_form
 from .utils import short_code_generator, is_valid_custom_code
-from .models import ShortURL
-from django.db.models import F
+from .models import ShortURL,ClickEvent
+from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
 from django.contrib.auth.models import User
@@ -20,6 +21,7 @@ from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
 from django.db import DataError, IntegrityError
 import traceback
+
 
 # Create your views here.
 
@@ -252,6 +254,11 @@ def redirect_url(request,short_code):
         raise Http404("This URL is disabled")
     url.click_count=F("click_count")+1   #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
     url.save(update_fields=["click_count"])
+    #store analytics event (details)
+    ClickEvent.objects.create(
+        short_url=url,
+        user_agent=request.META.get("HTTP_USER_AGENT","")
+    )
     return redirect(url.original_url)
 
 
@@ -355,4 +362,28 @@ def dashboard_stats(request):
     return JsonResponse({
         "total_clicks": total_clicks,
         "urls": url_stats
+    })
+
+@login_required
+def analytics_view(request,url_id):
+    url=get_object_or_404(ShortURL,id=url_id,user=request.user)
+    clicks=ClickEvent.objects.filter(short_url=url)
+
+    total_clicks=url.click_count #total clicks
+
+
+    last_click=clicks.order_by("timestamp").first() #last clicked time
+
+
+    daily_clicks=( #clicks per day
+        clicks
+        .annotate(day=TruncDate("timestamp")) #this create a temporary column in table which will convert the date time to date only.
+        .values("day") #this will group the rows that have the same day value.
+        .annotate(count=Count("id"))  #For each group, count how many rows it contains. this produce aggregated results.
+        .order_by("day") #the result is sorted chronologically.
+    )
+    return render(request,"analytics.html",{
+        "url":url,
+        "total_clicks":total_clicks,
+        "last_click":last_click.timestamp if last_click else None,
     })
