@@ -106,3 +106,34 @@ body {
   font-size: 13px;
   color: var(--text-muted);
 }
+
+/*css for range selector*/
+.range-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.range-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 999px;
+  text-decoration: none;
+
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.range-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.range-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: transparent;
+}

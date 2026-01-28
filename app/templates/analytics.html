@@ -46,6 +46,24 @@
       </div>
     </div>
 
+  <div class="range-selector">
+  <a href="?range=7"
+     class="range-btn {% if current_range == '7' %}active{% endif %}">
+    Last 7 days
+  </a>
+
+  <a href="?range=30"
+     class="range-btn {% if current_range == '30' %}active{% endif %}">
+    Last 30 days
+  </a>
+
+  <a href="?range=all"
+     class="range-btn {% if current_range == 'all' %}active{% endif %}">
+    All time
+  </a>
+</div>
+
+
     <!-- Chart -->
     <div class="analytics-card">
       <div class="chart-header">

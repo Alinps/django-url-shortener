@@ -389,7 +389,7 @@ def analytics_view(request,url_id):
 
     #Apply date filer if needed
     if start_date:
-        clicks=clicks.filter(timpestamp__gte=start_date)
+        clicks=clicks.filter(timestamp__gte=start_date)
 
     total_clicks=url.click_count #total clicks
 
