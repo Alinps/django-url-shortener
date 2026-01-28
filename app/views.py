@@ -367,12 +367,15 @@ def dashboard_stats(request):
 @login_required
 def analytics_view(request,url_id):
     url=get_object_or_404(ShortURL,id=url_id,user=request.user)
+    print("url: ",url)
     clicks=ClickEvent.objects.filter(short_url=url)
+    print("click_events:",clicks)
 
     total_clicks=url.click_count #total clicks
 
 
-    last_click=clicks.order_by("timestamp").first() #last clicked time
+    last_click=clicks.order_by("-timestamp").first() #last clicked time
+    print(last_click)
 
 
     daily_clicks=( #clicks per day
@@ -382,8 +385,14 @@ def analytics_view(request,url_id):
         .annotate(count=Count("id"))  #For each group, count how many rows it contains. this produce aggregated results.
         .order_by("day") #the result is sorted chronologically.
     )
+
+    days=[item["day"].strftime("%Y-%m-%d")  for item in daily_clicks]
+    counts=[item["count"] for item in daily_clicks]
     return render(request,"analytics.html",{
         "url":url,
         "total_clicks":total_clicks,
         "last_click":last_click.timestamp if last_click else None,
+        "daily_clicks":daily_clicks,
+        "days":days,
+        "counts":counts,
     })
