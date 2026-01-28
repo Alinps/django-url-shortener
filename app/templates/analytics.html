@@ -1,73 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  {% load static %}
+  <meta charset="UTF-8">
+  <title>Analytics</title>
+  <link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-<h2>Analytics for {{ url.title }}</h2>
+  <div class="analytics-container">
 
-<p>Total clicks: {{ total_clicks }}</p>
+    <!-- Header -->
+    <div class="analytics-header">
+      <div>
+        <h2>{{ url.title }}</h2>
+        <p class="subtitle">Link analytics overview</p>
+      </div>
+      <a href="{% url 'list' %}" class="back-link">← Back</a>
+    </div>
 
-{% if last_click %}
-  <p>Last clicked: {{ last_click }}</p>
-{% else %}
-  <p>No clicks yet</p>
-{% endif %}
-<h3>Clicks Over Time</h3>
-<canvas id="clickChart" height="100"></canvas>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Clicks</span>
+        <span class="stat-value">{{ total_clicks }}</span>
+      </div>
 
+      <div class="stat-card">
+        <span class="stat-label">Last Clicked</span>
+        <span class="stat-value">
+          {% if last_click %}
+            {{ last_click|timesince }} ago
+          {% else %}
+            Never
+          {% endif %}
+        </span>
+      </div>
 
-<h3>Clicks per day</h3>
-<ul>
-  {% for item in daily_clicks %}
-    <li>{{ item.day }} → {{ item.count }}</li>
-  {% empty %}
-    <li>No data</li>
-  {% endfor %}
-</ul>
+      <div class="stat-card">
+        <span class="stat-label">Status</span>
+        <span class="stat-value {% if url.is_active %}active{% else %}disabled{% endif %}">
+          {% if url.is_active %}Active{% else %}Disabled{% endif %}
+        </span>
+      </div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById("clickChart").getContext("2d");
+    <!-- Chart -->
+    <div class="analytics-card">
+      <div class="chart-header">
+        <h3>Clicks Over Time</h3>
+        <span class="chart-subtitle">Daily engagement</span>
+      </div>
+      <canvas id="clickChart"></canvas>
+    </div>
 
-  const clickChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: {{ days|safe }},
-      datasets: [{
-        label: "Clicks per day",
-        data: {{ counts|safe }},
-        borderColor: "#60a5fa",
-        backgroundColor: "rgba(96, 165, 250, 0.15)",
-        tension: 0.35,
-        fill: true,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        }
+  </div>
+
+  <script>
+    const ctx = document.getElementById("clickChart");
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: {{ days|safe }},
+        datasets: [{
+          data: {{ counts|safe }},
+          borderColor: "#60a5fa",
+          backgroundColor: "rgba(96,165,250,0.15)",
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 6,
+        }]
       },
-      scales: {
-        x: {
-          grid: { display: false }
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
         },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            precision: 0
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: "#9ca3af" }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: "#9ca3af",
+              precision: 0
+            }
           }
         }
       }
-    }
-  });
-</script>
-
-
+    });
+  </script>
 </body>
 </html>
