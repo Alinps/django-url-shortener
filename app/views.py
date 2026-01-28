@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db.models.functions import TruncDate
 from django.db.utils import DataError
 from django.contrib import messages
@@ -8,6 +10,8 @@ from django.http import JsonResponse
 import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
+from django.utils import timezone
+
 from .forms import SignUp,login_form
 from .utils import short_code_generator, is_valid_custom_code
 from .models import ShortURL,ClickEvent
@@ -367,15 +371,31 @@ def dashboard_stats(request):
 @login_required
 def analytics_view(request,url_id):
     url=get_object_or_404(ShortURL,id=url_id,user=request.user)
-    print("url: ",url)
+    #Read range from query params
+    range_params=request.GET.get("range","7")
+
+    #decide the start date
+    now=timezone.now()
+
+    if range_params=="30":
+        start_date=now-timedelta(days=30)
+    elif range_params=="all":
+        start_date=None
+    else:
+        start_date=now-timedelta(days=7)
+
+    #base queryset
     clicks=ClickEvent.objects.filter(short_url=url)
-    print("click_events:",clicks)
+
+    #Apply date filer if needed
+    if start_date:
+        clicks=clicks.filter(timpestamp__gte=start_date)
 
     total_clicks=url.click_count #total clicks
 
 
     last_click=clicks.order_by("-timestamp").first() #last clicked time
-    print(last_click)
+
 
 
     daily_clicks=( #clicks per day
