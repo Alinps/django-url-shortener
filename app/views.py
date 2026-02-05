@@ -1,7 +1,7 @@
 from datetime import timedelta
-
+from django.utils import timezone
+from datetime import datetime
 from django.db.models.functions import TruncDate
-from django.db.utils import DataError
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import Http404
@@ -11,7 +11,6 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from django.utils import timezone
-
 from .forms import SignUp,login_form
 from .utils import short_code_generator, is_valid_custom_code
 from .models import ShortURL,ClickEvent
@@ -19,7 +18,7 @@ from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
 from django.contrib.auth.models import User
-from .utils import generate_otp,send_reset_otp
+from .utils import generate_otp,send_reset_otp,detect_device_type
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
@@ -193,7 +192,7 @@ def update_url(request,id):
             if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
 
                 return JsonResponse({
-                    "sucess":False,
+                    "success":False,
                     "message":"Custom URL already exists"
                 })
 
@@ -253,15 +252,20 @@ def delete_url(request,id):
 
 
 def redirect_url(request,short_code):
-    url=get_object_or_404(ShortURL,short_code=short_code)
+    url=get_object_or_404(ShortURL,short_code=short_code,is_active=True)
     if not url.is_active:
         raise Http404("This URL is disabled")
     url.click_count=F("click_count")+1   #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
     url.save(update_fields=["click_count"])
+
+    ua = request.META.get("HTTP_USER_AGENT","")
+    device=detect_device_type(ua)
+
     #store analytics event (details)
     ClickEvent.objects.create(
         short_url=url,
-        user_agent=request.META.get("HTTP_USER_AGENT","")
+        user_agent=request.META.get("HTTP_USER_AGENT",""),
+        device_type=device
     )
     return redirect(url.original_url)
 
@@ -371,36 +375,69 @@ def dashboard_stats(request):
 @login_required
 def analytics_view(request,url_id):
     url=get_object_or_404(ShortURL,id=url_id,user=request.user)
+    # base queryset
+    clicks = ClickEvent.objects.filter(short_url=url)
     #Read range from query params
-    range_params=request.GET.get("range","7")
+    range_params=request.GET.get("range")
+    start_params=request.GET.get("start")
+    end_params=request.GET.get("end")
+
+
+
 
     #decide the start date
     now=timezone.now()
+    start_date=None
+    end_date=None
 
-    if range_params=="30":
+    #Preset ranges
+    if range_params=="7":
+        start_date=now - timedelta(days=7)
+    elif range_params=="30":
         start_date=now-timedelta(days=30)
     elif range_params=="all":
         start_date=None
-    else:
-        start_date=now-timedelta(days=7)
 
-    #base queryset
-    clicks=ClickEvent.objects.filter(short_url=url)
+    #Custom range (overrides presets)
+    if start_params and end_params:
+        try:
+            start_date=datetime.strptime(start_params,"%Y-%m-%d")
+            end_date=datetime.strptime(end_params,"%Y-%m-%d") + timedelta(days=1)
+
+            start_date=timezone.make_aware(start_date)
+            end_date=timezone.make_aware(end_date)
+        except ValueError:
+            start_date=None
+            end_date=None
+
+
+
 
     #Apply date filer if needed
     if start_date:
         clicks=clicks.filter(timestamp__gte=start_date)
+    if end_date:
+        clicks=clicks.filter(timestamp__lt=end_date)
 
+    #---Aggregations---
     total_clicks=url.click_count #total clicks
 
+    device_stats = (
+        clicks
+        .values("device_type")
+        .annotate(count=Count("id"))
+    )
 
-    last_click=clicks.order_by("-timestamp").first() #last clicked time
+
+    last_click_obj=clicks.order_by("-timestamp").first() #last clicked time
+    last_click = last_click_obj.timestamp if last_click_obj else None
+
 
 
 
     daily_clicks=( #clicks per day
         clicks
-        .annotate(day=TruncDate("timestamp")) #this create a temporary column in table which will convert the date time to date only.
+        .annotate(day=TruncDate("timestamp")) #this creates a temporary column in table which will convert the date time to date only.
         .values("day") #this will group the rows that have the same day value.
         .annotate(count=Count("id"))  #For each group, count how many rows it contains. this produce aggregated results.
         .order_by("day") #the result is sorted chronologically.
@@ -411,8 +448,13 @@ def analytics_view(request,url_id):
     return render(request,"analytics.html",{
         "url":url,
         "total_clicks":total_clicks,
-        "last_click":last_click.timestamp if last_click else None,
+        "last_click":last_click,
         "daily_clicks":daily_clicks,
+        "current_range":range_params,
         "days":days,
         "counts":counts,
+        "start":start_params,
+        "end":end_params,
+        "device_stats":device_stats,
     })
+

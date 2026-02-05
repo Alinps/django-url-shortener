@@ -61,6 +61,14 @@
      class="range-btn {% if current_range == 'all' %}active{% endif %}">
     All time
   </a>
+
+  <form method="get" class="date-range-form">
+    <input type="date" name="start" value="{{ start }}">
+    <input type="date" name="end" value="{{ end }}">
+    <button type="submit">Apply</button>
+  </form>
+
+
 </div>
 
 
@@ -113,5 +121,17 @@
       }
     });
   </script>
+<div class="analytics-card">
+  <h3>Device Breakdown</h3>
+
+  {% for item in device_stats %}
+    <p>
+      {{ item.device_type|title }} — {{ item.count }}
+    </p>
+  {% empty %}
+    <p>No device data available</p>
+  {% endfor %}
+</div>
+
 </body>
 </html>
