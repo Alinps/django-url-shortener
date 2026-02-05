@@ -119,9 +119,10 @@ body {
 }
 
 .range-btn {
-  padding: 6px 14px;
+  height:10px;
+  padding: 10px 14px;
   font-size: 13px;
-  border-radius: 999px;
+  border-radius: 100px;
   text-decoration: none;
 
   color: var(--text-muted);
@@ -175,4 +176,7 @@ body {
 
 .chart-pie {
   height: 240px;         /* pies should be smaller */
+}
+.chart-center{
+margin:0 auto;
 }
