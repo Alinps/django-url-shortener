@@ -86,11 +86,14 @@ body {
 
 /* Chart */
 .analytics-card {
+  width:500px;
   background: var(--bg-card);
   border: 1px solid var(--border-soft);
   border-radius: 18px;
   padding: 24px;
   backdrop-filter: blur(12px);
+  margin:0 auto;
+
 }
 
 .chart-header {
@@ -105,6 +108,7 @@ body {
 .chart-subtitle {
   font-size: 13px;
   color: var(--text-muted);
+   max-width: 600px;
 }
 
 /*css for range selector*/
@@ -162,4 +166,13 @@ body {
   font-size: 13px;
   cursor: pointer;
   color: #000;
+}
+.chart-small {
+  max-width: 600px;      /* controls width */
+  height: 280px;         /* controls height */
+  margin: 0 auto 30px;   /* center + spacing */
+}
+
+.chart-pie {
+  height: 240px;         /* pies should be smaller */
 }

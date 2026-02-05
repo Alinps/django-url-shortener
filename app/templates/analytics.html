@@ -73,7 +73,7 @@
 
 
     <!-- Chart -->
-    <div class="analytics-card">
+    <div class="analytics-card chart-small">
       <div class="chart-header">
         <h3>Clicks Over Time</h3>
         <span class="chart-subtitle">Daily engagement</span>
@@ -81,6 +81,15 @@
       <canvas id="clickChart"></canvas>
     </div>
 
+  </div>
+
+  <div class="analytics-card chart-samll chart-pie">
+    <h3>Device Distribution</h3>
+    {%if device_counts%}
+    <canvas id="deviceChart" height="220"></canvas>
+    {%else%}
+    <p>No devices data for this range.</p>
+    {%endif%}
   </div>
 
   <script>
@@ -121,17 +130,41 @@
       }
     });
   </script>
-<div class="analytics-card">
-  <h3>Device Breakdown</h3>
 
-  {% for item in device_stats %}
-    <p>
-      {{ item.device_type|title }} — {{ item.count }}
-    </p>
-  {% empty %}
-    <p>No device data available</p>
-  {% endfor %}
-</div>
+<script>
+  const deviceCtx = document
+    .getElementById("deviceChart")
+    .getContext("2d");
+
+  new Chart(deviceCtx, {
+    type: "pie",
+    data: {
+      labels: {{ device_labels|safe }},
+      datasets: [{
+        data: {{ device_counts|safe }},
+        backgroundColor: [
+          "#60a5fa", // Mobile
+          "#34d399", // Desktop
+          "#fbbf24", // Tablet
+          "#f87171"  // Unknown
+        ],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "#e5e7eb",
+            padding: 16
+          }
+        }
+      }
+    }
+  });
+</script>
 
 </body>
 </html>

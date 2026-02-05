@@ -442,7 +442,10 @@ def analytics_view(request,url_id):
         .annotate(count=Count("id"))  #For each group, count how many rows it contains. this produce aggregated results.
         .order_by("day") #the result is sorted chronologically.
     )
-
+    device_labels=[item["device_type"].title() if item["device_type"] else "Unknown"
+                   for item in device_stats
+                   ]
+    device_counts=[item["count"] for item in device_stats]
     days=[item["day"].strftime("%Y-%m-%d")  for item in daily_clicks]
     counts=[item["count"] for item in daily_clicks]
     return render(request,"analytics.html",{
@@ -456,5 +459,8 @@ def analytics_view(request,url_id):
         "start":start_params,
         "end":end_params,
         "device_stats":device_stats,
+        "device_labels":device_labels,
+        "device_counts":device_counts
+
     })
 
