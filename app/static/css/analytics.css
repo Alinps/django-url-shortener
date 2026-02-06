@@ -169,9 +169,9 @@ body {
   color: #000;
 }
 .chart-small {
-  max-width: 600px;      /* controls width */
+  max-width: 500px;      /* controls width */
   height: 280px;         /* controls height */
-  margin: 0 auto 30px;   /* center + spacing */
+  margin: 0 auto 20px;   /* center + spacing */
 }
 
 .chart-pie {
@@ -179,4 +179,10 @@ body {
 }
 .chart-center{
 margin:0 auto;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 24px;
 }

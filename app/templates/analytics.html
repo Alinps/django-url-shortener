@@ -73,6 +73,7 @@
 
 
     <!-- Chart -->
+    <div class="analytics-grid">
     <div class="analytics-card chart-small">
       <div class="chart-header">
         <h3>Clicks Over Time</h3>
@@ -81,7 +82,7 @@
       <canvas id="clickChart"></canvas>
     </div>
 
-  </div>
+
 
   <div class="analytics-card chart-samll chart-pie">
     <h3>Device Distribution</h3>
@@ -90,6 +91,7 @@
     {%else%}
     <p>No devices data for this range.</p>
     {%endif%}
+  </div>
   </div>
 
   <script>
@@ -111,6 +113,7 @@
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: { display: false }
         },
@@ -153,6 +156,7 @@
     },
     options: {
       responsive: true,
+       maintainAspectRatio: false,
       plugins: {
         legend: {
           position: "bottom",
