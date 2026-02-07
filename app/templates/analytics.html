@@ -6,6 +6,8 @@
   <title>Analytics</title>
   <link rel="stylesheet" href="{% static 'css/analytics.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
 </head>
 
 <body>
@@ -93,6 +95,7 @@
     {%endif%}
   </div>
   </div>
+  </div>
 
   <script>
     const ctx = document.getElementById("clickChart");
@@ -156,7 +159,7 @@
     },
     options: {
       responsive: true,
-       maintainAspectRatio: false,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           position: "bottom",
@@ -164,11 +167,32 @@
             color: "#e5e7eb",
             padding: 16
           }
+        },
+        datalabels: {
+          color: "#000",
+          font: {
+            weight: "bold",
+            size: 12
+          },
+          formatter: (value, ctx) => {
+            const data = ctx.chart.data.datasets[0].data;
+            const total = data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+
+            return percentage + "%";
+          },
+          display: (ctx) => {
+            const value = ctx.dataset.data[ctx.dataIndex];
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            return (value / total) * 100 >= 5; // hide tiny slices
+          }
         }
       }
-    }
+    },
+    plugins: [ChartDataLabels]
   });
 </script>
+
 
 </body>
 </html>
