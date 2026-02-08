@@ -12,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from django.utils import timezone
 from .forms import SignUp,login_form
+from .tasks import record_click_event
 from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ShortURL,ClickEvent
 from django.db.models import F, Count
@@ -338,6 +339,7 @@ def delete_url(request,id):
 
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
+
     cache_key=f"short_url:{short_code}"
 
     #STEP 1: Try cache
@@ -347,17 +349,11 @@ def redirect_url(request,short_code):
         if not cached["is_active"]:
             raise Http404("This URL is disables")
 
-        ua = request.META.get("HTTP_USER_AGENT","")
-        device = detect_device_type(ua)
-
-        ShortURL.objects.filter(short_code=short_code).update(
-            click_count=F("click_count")+1
-        )
-
-        ClickEvent.objects.create(
-            short_url_id=cached["id"],
-            user_agent=ua,
-            device_type=device
+        # Enqueue analytics (NON-BLOCKING)
+        record_click_event.delay(
+            cached["id"],
+            request.META.get("HTTP_USER_AGENT",""),
+            detect_device_type(request.META.get("HTTP_USER_AGENT",""))
         )
         print("CACHE HIT")
         return redirect(cached["original_url"])
@@ -379,18 +375,10 @@ def redirect_url(request,short_code):
         CACHE_TTL
     )
 
-    #STEP 4: TEMP analytics
-    ua = request.META.get("HTTPS_USER_AGENT","")
-    device = detect_device_type(ua)
-
-    ShortURL.objects.filter(id=url.id).update(
-        click_count=F("click_count") + 1
-    )
-
-    ClickEvent.objects.create(
-        short_url=url,
-        user_agent=ua,
-        device_type=device
+    record_click_event.delay(
+        url.id,
+        request.META.get("HTTP_USER_AGENT",""),
+        detect_device_type(request.META.get("HTTP_USER_AGENT",""))
     )
 
     return redirect(url.original_url)
