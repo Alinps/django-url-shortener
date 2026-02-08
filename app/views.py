@@ -12,18 +12,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login,logout
 from django.utils import timezone
 from .forms import SignUp,login_form
-from .utils import short_code_generator, is_valid_custom_code
+from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ShortURL,ClickEvent
 from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
 from django.contrib.auth.models import User
-from .utils import generate_otp,send_reset_otp,detect_device_type
+from .utils.mail_sender import send_reset_otp
+from .utils.detect_device import detect_device_type
+from .utils.otp_generate import generate_otp
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
 from django.db import DataError, IntegrityError
 import traceback
+from .utils.base62 import encode_base62
 
 
 # Create your views here.
@@ -74,51 +77,107 @@ def logout_user(request):
         return redirect('login')
     return render(request,'logout.html')
 
+
 @never_cache
 @login_required
 @csrf_protect
 def home_page(request):
-    if request.method == 'POST':
-        original_url = request.POST.get("original_url")
-        title = request.POST.get("title")
-        custom_code = request.POST.get("custom_code", "").strip()
-
-        print("CUSTOM_CODE:", custom_code)
-
-        # Decide short_code
-        if custom_code:
-            if not is_valid_custom_code(custom_code):
-                messages.error(request, "Invalid short URL format")
-                return redirect("home")
-
-            if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
-                messages.error(request, "Short URL already exists")
-                return redirect("home")
-
-            short_code = custom_code
-        else:
-            while True:
-                short_code = short_code_generator()
-                if not ShortURL.objects.filter(short_code=short_code).exists():
-                    break
+    if request.method == "POST":
+        original_url=request.POST.get("original_url")
+        title=request.POST.get("title")
+        custom_code=request.POST.get("custom_code","").strip()
 
         try:
-            ShortURL.objects.create(
-                user=request.user,
-                original_url=original_url,
-                short_code=short_code,
-                title=title
-            )
-            messages.success(request, "URL shortened successfully")
+            #CASE 1 : User wants a custom shortcode
+            if custom_code:
+                if not is_valid_custom_code(custom_code):
+                    messages.error(request, "Invalid short URL format")
+                    return redirect("home")
+
+                #Attempt to create directly
+                short_url = ShortURL.objects.create(
+                    user=request.user,
+                    original_url=original_url,
+                    short_code=custom_code,
+                    title=title
+                )
+
+            #CASE 2 : Auto-generate shortcode (production way)
+            else:
+                # Step 1 : Create row without short_code
+                short_url=ShortURL.objects.create(
+                    user=request.user,
+                    original_url=original_url,
+                    title=title
+                )
+                # Step 2: generate deterministic code
+                short_url.short_code = encode_base62(short_url.id)
+
+                # Step 3: update only short_code
+                short_url.save(update_fields=["short_code"])
+
+            messages.success(request, "URL shortneed successfully")
             return redirect("list")
 
-        except DataError:
-            messages.error(
-                request,
-                "The URL is too long. Please enter a shorter or valid URL."
-            )
+        except IntegrityError:
+            # Triggered when custom_code already exists
+            messages.error(request, "Short URL already exists")
             return redirect("home")
+
+        except DataError:
+            messages.error(request,"The URL is too long or Invalid.")
+            return redirect("home")
+
     return render(request, "home.html")
+
+
+
+
+# @never_cache
+# @login_required
+# @csrf_protect
+# def home_page(request):
+#     if request.method == 'POST':
+#         original_url = request.POST.get("original_url")
+#         title = request.POST.get("title")
+#         custom_code = request.POST.get("custom_code", "").strip()
+#
+#         print("CUSTOM_CODE:", custom_code)
+#
+#         # Decide short_code
+#         if custom_code:
+#             if not is_valid_custom_code(custom_code):
+#                 messages.error(request, "Invalid short URL format")
+#                 return redirect("home")
+#
+#             if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
+#                 messages.error(request, "Short URL already exists")
+#                 return redirect("home")
+#
+#             short_code = custom_code
+#         else:
+#             while True:
+#                 short_code = short_code_generator()
+#                 if not ShortURL.objects.filter(short_code=short_code).exists():
+#                     break
+#
+#         try:
+#             ShortURL.objects.create(
+#                 user=request.user,
+#                 original_url=original_url,
+#                 short_code=short_code,
+#                 title=title
+#             )
+#             messages.success(request, "URL shortened successfully")
+#             return redirect("list")
+#
+#         except DataError:
+#             messages.error(
+#                 request,
+#                 "The URL is too long. Please enter a shorter or valid URL."
+#             )
+#             return redirect("home")
+#     return render(request, "home.html")
 
 @never_cache
 @login_required
@@ -178,38 +237,38 @@ def update_url(request,id):
         data=json.loads(request.body)
         url=get_object_or_404(ShortURL,id=id,user=request.user)
 
-        url.title=data["title"]
-        url.original_url=data["original_url"]
+
         custom_code=data["custom_code"]
-        if custom_code:
-            if not is_valid_custom_code(custom_code):
 
+        try:
+            if custom_code:
+
+                if not is_valid_custom_code(custom_code):
+
+                    return JsonResponse({
+                        "success":False,
+                        "message":"Invalid Custom URL formal"
+                    })
+                url.short_code=custom_code
+                url.title = data["title"]
+                url.original_url = data["original_url"]
+                url.save(update_fields=["short_code","title","original_url"])
                 return JsonResponse({
-                    "success":False,
-                    "message":"Invalid Custom URL formal"
-                })
-
-            if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
-
-                return JsonResponse({
-                    "success":False,
-                    "message":"Custom URL already exists"
-                })
-
-            short_code = custom_code
-        else:
-            while True:
-                short_code = short_code_generator()
-                if not ShortURL.objects.filter(short_code=short_code).exists():
-                    break
-        url.short_code=short_code
-        url.save()
-        return JsonResponse({
-            "success":True,
-            "title":url.title,
-            "original_url":url.original_url,
-            "custom_url":url.short_code
-        })
+                        "success":True,
+                        "title":url.title,
+                        "original_url":url.original_url,
+                        "custom_url":url.short_code
+                    })
+        except IntegrityError:
+            return JsonResponse({
+                "success":False,
+                "message":"URL Shortcode already exists, try new custom short code."
+            })
+        except DataError:
+            return JsonResponse({
+                "success":False,
+                "message":"Too Long URL or, Invalid URL format."
+            })
     return None
 
 
