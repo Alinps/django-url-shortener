@@ -12,6 +12,9 @@ class ShortURL(models.Model):
     click_count=models.PositiveIntegerField(default=0)
     is_active=models.BooleanField(default=True)
 
+    class Meta:
+        indexes = [models.Index(fields=["short_code"]),]
+
     def __str__(self):
         return f"{self.short_code} -> {self.original_url}"
 
