@@ -311,11 +311,15 @@ def delete_url(request,id):
 
 
 def redirect_url(request,short_code):
-    url=get_object_or_404(ShortURL,short_code=short_code,is_active=True)
-    if not url.is_active:
-        raise Http404("This URL is disabled")
-    url.click_count=F("click_count")+1   #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
-    url.save(update_fields=["click_count"])
+    url=get_object_or_404(ShortURL.objects.only("original_url"),
+                          short_code=short_code,
+                          is_active=True)
+
+    ShortURL.objects.filter(id=url.id).update( #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
+        click_count=F("click_count") + 1
+    )
+
+
 
     ua = request.META.get("HTTP_USER_AGENT","")
     device=detect_device_type(ua)
