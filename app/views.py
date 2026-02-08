@@ -27,6 +27,7 @@ from django.views.decorators.cache import never_cache
 from django.db import DataError, IntegrityError
 import traceback
 from .utils.base62 import encode_base62
+from django.core.cache import cache
 
 
 # Create your views here.
@@ -310,27 +311,92 @@ def delete_url(request,id):
     return None
 
 
-def redirect_url(request,short_code):
-    url=get_object_or_404(ShortURL.objects.only("original_url"),
-                          short_code=short_code,
-                          is_active=True)
+# def redirect_url(request,short_code):
+#     url=get_object_or_404(ShortURL.objects.only("original_url"),
+#                           short_code=short_code,
+#                           is_active=True)
+#
+#     ShortURL.objects.filter(id=url.id).update( #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
+#         click_count=F("click_count") + 1
+#     )
+#
+#
+#
+#     ua = request.META.get("HTTP_USER_AGENT","")
+#     device=detect_device_type(ua)
+#
+#     #store analytics event (details)
+#     ClickEvent.objects.create(
+#         short_url=url,
+#         user_agent=request.META.get("HTTP_USER_AGENT",""),
+#         device_type=device
+#     )
+#     return redirect(url.original_url)
 
-    ShortURL.objects.filter(id=url.id).update( #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
+
+
+
+CACHE_TTL = 60 * 60 # 1 hour
+def redirect_url(request,short_code):
+    cache_key=f"short_url:{short_code}"
+
+    #STEP 1: Try cache
+    cached = cache.get(cache_key)
+
+    if cached:
+        if not cached["is_active"]:
+            raise Http404("This URL is disables")
+
+        ua = request.META.get("HTTP_USER_AGENT","")
+        device = detect_device_type(ua)
+
+        ShortURL.objects.filter(short_code=short_code).update(
+            click_count=F("click_count")+1
+        )
+
+        ClickEvent.objects.create(
+            short_url_id=cached["id"],
+            user_agent=ua,
+            device_type=device
+        )
+        print("CACHE HIT")
+        return redirect(cached["original_url"])
+
+    #STEP 2: Cache miss -> DB
+    url = get_object_or_404(
+        ShortURL.objects.only("id","original_url","is_active"),
+        short_code=short_code,
+        is_active=True
+    )
+
+    cache.set(
+        cache_key,
+        {
+            "id":url.id,
+            "original_url":url.original_url,
+            "is_active":url.is_active,
+        },
+        CACHE_TTL
+    )
+
+    #STEP 4: TEMP analytics
+    ua = request.META.get("HTTPS_USER_AGENT","")
+    device = detect_device_type(ua)
+
+    ShortURL.objects.filter(id=url.id).update(
         click_count=F("click_count") + 1
     )
 
-
-
-    ua = request.META.get("HTTP_USER_AGENT","")
-    device=detect_device_type(ua)
-
-    #store analytics event (details)
     ClickEvent.objects.create(
         short_url=url,
-        user_agent=request.META.get("HTTP_USER_AGENT",""),
+        user_agent=ua,
         device_type=device
     )
+
     return redirect(url.original_url)
+
+
+
 
 
 @login_required
