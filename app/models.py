@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.conf import settings
 # Create your models here.
 class ShortURL(models.Model):
 
@@ -36,3 +37,30 @@ class ClickEvent(models.Model):
 
     def __str__(self):
         return f"Click on {self.short_url.short_code}at {self.timestamp}"
+
+
+
+#Hot table for redirecting url
+class ShortURLCore(models.Model):
+    short_code = models.CharField(max_length=10, unique=True)
+    original_url = models.URLField()
+    is_active = models.BooleanField(default=True)
+    expires_at = models.DateTimeField(null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["short_code"]),]
+
+    def __str__(self):
+        return f"{self.short_code} -> {self.original_url}"
+
+
+# Cold table for user and meta data
+class ShortURLMeta(models.Model):
+    short_url = models.OneToOneField(ShortURLCore,on_delete=models.CASCADE,related_name="meta",)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,null=True,blank=True)
+    title=models.CharField(max_length=255,blank=True)
+    click_count= models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"Meta for {self.short_url.short_code}"
