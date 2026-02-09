@@ -14,7 +14,7 @@ from django.utils import timezone
 from .forms import SignUp,login_form
 from .tasks import record_click_event
 from .utils.shortcode_validator import  is_valid_custom_code
-from .models import ShortURL,ClickEvent
+from .models import ShortURL,ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
@@ -360,7 +360,7 @@ def redirect_url(request,short_code):
 
     #STEP 2: Cache miss -> DB
     url = get_object_or_404(
-        ShortURL.objects.only("id","original_url","is_active"),
+        ShortURLCore.objects.only("id","original_url","is_active"), # New table
         short_code=short_code,
         is_active=True
     )
