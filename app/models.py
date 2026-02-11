@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.conf import settings
+
+from app.utils.base62 import encode_base62
+
+
 # Create your models here.
 class ShortURL(models.Model):
 
@@ -43,6 +47,13 @@ class ShortURLCore(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["short_code"]),]
+
+    def save(self, *args, **kwargs):
+        super().save(*args,**kwargs)
+
+        if not self.short_code:
+            self.short_code = encode_base62(self.id)
+            super().save(update_fields=["short_code"])
 
     def __str__(self):
         return f"{self.short_code} -> {self.original_url}"
