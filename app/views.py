@@ -13,6 +13,7 @@ from django.contrib.auth import login,logout
 from django.utils import timezone
 from .forms import SignUp,login_form
 from .tasks import record_click_event
+from .utils.id_generator import get_next_short_id
 from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ShortURL,ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
@@ -25,7 +26,7 @@ from .utils.otp_generate import generate_otp
 from .models import PasswordResetOTP
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
-from django.db import DataError, IntegrityError
+from django.db import DataError, IntegrityError, transaction
 import traceback
 from .utils.base62 import encode_base62
 from django.core.cache import cache
@@ -80,57 +81,118 @@ def logout_user(request):
     return render(request,'logout.html')
 
 
+# @never_cache
+# @login_required
+# @csrf_protect
+# def home_page(request):
+#     if request.method == "POST":
+#         original_url=request.POST.get("original_url")
+#         title=request.POST.get("title")
+#         custom_code=request.POST.get("custom_code","").strip()
+#
+#         try:
+#             #CASE 1 : User wants a custom shortcode
+#             if custom_code:
+#                 if not is_valid_custom_code(custom_code):
+#                     messages.error(request, "Invalid short URL format")
+#                     return redirect("home")
+#
+#                 #Attempt to create directly
+#                 short_url = ShortURL.objects.create(
+#                     user=request.user,
+#                     original_url=original_url,
+#                     short_code=custom_code,
+#                     title=title
+#                 )
+#
+#             #CASE 2 : Auto-generate shortcode (production way)
+#             else:
+#                 # Step 1 : Create row without short_code
+#                 short_url=ShortURL.objects.create(
+#                     user=request.user,
+#                     original_url=original_url,
+#                     title=title
+#                 )
+#                 # Step 2: generate deterministic code
+#                 short_url.short_code = encode_base62(short_url.id)
+#
+#                 # Step 3: update only short_code
+#                 short_url.save(update_fields=["short_code"])
+#
+#             messages.success(request, "URL shortneed successfully")
+#             return redirect("list")
+#
+#         except IntegrityError:
+#             # Triggered when custom_code already exists
+#             messages.error(request, "Short URL already exists")
+#             return redirect("home")
+#
+#         except DataError:
+#             messages.error(request,"The URL is too long or Invalid.")
+#             return redirect("home")
+#
+#     return render(request, "home.html")
+
+
+
+
+
+
+
+
 @never_cache
 @login_required
 @csrf_protect
 def home_page(request):
     if request.method == "POST":
-        original_url=request.POST.get("original_url")
-        title=request.POST.get("title")
-        custom_code=request.POST.get("custom_code","").strip()
+        original_url = request.POST.get("original_url")
+        title =  request.POST.get("title")
+        custom_code = request.POST.get("custom_code")
 
         try:
-            #CASE 1 : User wants a custom shortcode
-            if custom_code:
-                if not is_valid_custom_code(custom_code):
-                    messages.error(request, "Invalid short URL format")
-                    return redirect("home")
+            with transaction.atomic():
+                if custom_code:
+                    if not is_valid_custom_code(custom_code):
+                        messages.error(request, "Invalid short URL format")
+                        return redirect("home")
 
-                #Attempt to create directly
-                short_url = ShortURL.objects.create(
+                    core = ShortURLCore.objects.create(
+                        short_code=custom_code,
+                        original_url=original_url,
+                        is_active=True
+                    )
+
+                else:
+                    counter = get_next_short_id()
+                    short_code = encode_base62(counter)
+
+                    core = ShortURLCore.objects.create(
+                        short_code=short_code,
+                        original_url=original_url,
+                        is_active=True
+                    )
+                ShortURLMeta.objects.create(
+                    short_url=core,
                     user=request.user,
-                    original_url=original_url,
-                    short_code=custom_code,
-                    title=title
+                    title=title or "",
+                    click_count=0
                 )
 
-            #CASE 2 : Auto-generate shortcode (production way)
-            else:
-                # Step 1 : Create row without short_code
-                short_url=ShortURL.objects.create(
-                    user=request.user,
-                    original_url=original_url,
-                    title=title
-                )
-                # Step 2: generate deterministic code
-                short_url.short_code = encode_base62(short_url.id)
-
-                # Step 3: update only short_code
-                short_url.save(update_fields=["short_code"])
-
-            messages.success(request, "URL shortneed successfully")
+            messages.success(request,"URL shortened successfully")
             return redirect("list")
-
         except IntegrityError:
-            # Triggered when custom_code already exists
             messages.error(request, "Short URL already exists")
             return redirect("home")
+    return render(request,"home.html")
 
-        except DataError:
-            messages.error(request,"The URL is too long or Invalid.")
-            return redirect("home")
 
-    return render(request, "home.html")
+
+
+
+
+
+
+
 
 
 
