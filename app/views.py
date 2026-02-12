@@ -190,7 +190,43 @@ def home_page(request):
 
 
 
+@never_cache
+@login_required
+def list_url(request):
+    query = request.GET.get("q","")
 
+    urls = (
+        ShortURLMeta.objects
+        .filter(user=request.user)
+        .select_related("short_url")
+        .order_by("-short_url__created_at")
+    )
+
+
+    if query:
+        urls = urls.filter(title__icontains=query)
+
+    paginator = Paginator(urls,10)
+    page_number = request.GET.get("page")
+    url_qs = paginator.get_page(page_number)
+
+    total_clicks=urls.aggregate(
+        total=Sum("click_count")
+    )["total"] or 0
+
+    total_urls = urls.count()
+    active_urls = urls.filter(short_url__is_active=True).count()
+    disabled_urls = urls.filter(short_url__is_active=False).count()
+    print("active_urls",active_urls)
+    print("disabled_urls",disabled_urls)
+
+    return render(request, "list.html",{
+        "urls":url_qs,
+        "total_clicks":total_clicks,
+        "total_urls":total_urls,
+        "active_urls":active_urls,
+        "disabled_urls":disabled_urls
+    })
 
 
 
@@ -243,30 +279,30 @@ def home_page(request):
 #             return redirect("home")
 #     return render(request, "home.html")
 
-@never_cache
-@login_required
-def list_url(request):
-    query=request.GET.get("q","")
-    urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
-    if query:
-        urls=urls.filter(title__icontains=query)
-    paginator = Paginator(urls, 10)  # 10 urls per page
-    page_number = request.GET.get("page")
-    url_qs = paginator.get_page(page_number)
-
-    total_clicks=urls.aggregate(
-        total=Sum("click_count")
-    )["total"] or 0    #if no url Sum returns none, "or 0" prevents template crashes
-    total_urls=urls.count()
-    active_urls=urls.filter(is_active=True).count()
-    disabled_urls=urls.filter(is_active=False).count()
-    return render(request,"list.html",{
-        "urls":url_qs,
-        "total_clicks":total_clicks,
-        "total_urls":total_urls,
-        "active_urls":active_urls,
-        "disabled_urls":disabled_urls
-        })
+# @never_cache
+# @login_required
+# def list_url(request):
+#     query=request.GET.get("q","")
+#     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
+#     if query:
+#         urls=urls.filter(title__icontains=query)
+#     paginator = Paginator(urls, 10)  # 10 urls per page
+#     page_number = request.GET.get("page")
+#     url_qs = paginator.get_page(page_number)
+#
+#     total_clicks=urls.aggregate(
+#         total=Sum("click_count")
+#     )["total"] or 0    #if no url Sum returns none, "or 0" prevents template crashes
+#     total_urls=urls.count()
+#     active_urls=urls.filter(is_active=True).count()
+#     disabled_urls=urls.filter(is_active=False).count()
+#     return render(request,"list.html",{
+#         "urls":url_qs,
+#         "total_clicks":total_clicks,
+#         "total_urls":total_urls,
+#         "active_urls":active_urls,
+#         "disabled_urls":disabled_urls
+#         })
 
 
 
@@ -297,104 +333,146 @@ def search_urls(request):
 
 @login_required
 def update_url(request,id):
-    if request.method=="POST":
-        data=json.loads(request.body)
-        url=get_object_or_404(ShortURL,id=id,user=request.user)
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON"})
+        print("id",id)
 
+        meta = get_object_or_404(
+            ShortURLMeta.objects.select_related("short_url"),
+            id=id,
+            user=request.user
+        )
 
-        custom_code=data["custom_code"]
+        core = meta.short_url
+        new_title = data.get("title")
+        print("new_title",new_title)
+        new_original_url = data.get("original_url")
+        print("new_original_url",new_original_url)
+        custom_code = data.get("custom_code","").strip()
+        print("custom_code",custom_code)
+        if not new_original_url:
+            return JsonResponse({
+                "success": False,
+                "message": "Original URL cannot be empty"
+            })
 
         try:
-            if custom_code:
+            with transaction.atomic():
+                old_short_code = core.short_code
 
-                if not is_valid_custom_code(custom_code):
+                if custom_code and custom_code  != core.short_code:
+                    # Rule 1 : Never clicked
+                    never_clicked = not ClickEvent.objects.filter(short_url=core).exists()
 
-                    return JsonResponse({
-                        "success":False,
-                        "message":"Invalid Custom URL formal"
-                    })
-                url.short_code=custom_code
-                url.title = data["title"]
-                url.original_url = data["original_url"]
-                url.save(update_fields=["short_code","title","original_url"])
-                return JsonResponse({
-                        "success":True,
-                        "title":url.title,
-                        "original_url":url.original_url,
-                        "custom_url":url.short_code
-                    })
-        except IntegrityError:
+
+                    # Rule 2 : Created within 5 minutes
+                    within_5_minutes=(
+                        timezone.now() - core.created_at
+                    ) <= timedelta(minutes=5)
+
+                    if not (never_clicked or within_5_minutes):
+                        return JsonResponse({
+                            "success":False,
+                            "message":"Shortcode cannot be changed after exposure"
+                        })
+                    # Validate Custom shortcode
+                    if not is_valid_custom_code(custom_code):
+                        return JsonResponse({
+                            "success":False,
+                            "message":"Invalid custom URL format."
+                        })
+
+                    # Prevent collision (excluding self)
+                    if ShortURLCore.objects.exclude(id=core.id).filter(short_code=custom_code).exists():
+                        return JsonResponse({
+                            "success":False,
+                            "message":"Shortcode already exists."
+                        })
+                    core.short_code = custom_code
+
+                # Always allow updating title and destination
+                core.original_url = new_original_url
+                meta.title = new_title
+
+                core.save(update_fields=["short_code","original_url"])
+                meta.save(update_fields=["title"])
+
+                # Cache invalidation
+                cache.delete(f"short_url:{old_short_code}")
+
+                if custom_code and custom_code != old_short_code:
+                    cache.delete(f"short_url:{custom_code}")
+
             return JsonResponse({
-                "success":False,
-                "message":"URL Shortcode already exists, try new custom short code."
+                "success":True,
+                "title":meta.title,
+                "original_url":core.original_url,
+                "custom_url":core.short_code
             })
+
         except DataError:
             return JsonResponse({
                 "success":False,
-                "message":"Too Long URL or, Invalid URL format."
+                "message":"Invalid or too long URL"
             })
-    return None
+    else:
+        meta = get_object_or_404(
+            ShortURLMeta.objects.select_related("short_url"),
+            id=id,
+            user=request.user
+        )
+        return JsonResponse({
+            "id":meta.id,
+            "title":meta.title,
+            "original_url":meta.short_url.original_url,
+            "custom_url":meta.short_url.short_code
+        })
 
 
-# @never_cache
-# @login_required
-# def update_url(request,ids):
-#     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
-#     if request.method=="POST":
-#         new_url=request.POST.get("original_url")
-#         new_status=request.POST.get("status")
-#         new_title=request.POST.get("title")
-#         url_obj.original_url=new_url
-#         url_obj.is_active=new_status
-#         url_obj.title=new_title
-#         url_obj.save()
-#         return redirect("list")
-#     return render(request,"edit.html",{"url":url_obj})
 
-# @never_cache
-# @login_required
-# def delete_url(request,ids):
-#     url_obj=get_object_or_404(ShortURL,id=ids,user=request.user)
-#     if request.method=='POST':
-#         url_obj.delete()
-#         return redirect("list")
-#     return render(request,"delete.html",{'url':url_obj})
+
+
+
+
+
+
 
 @login_required
 def delete_url(request,id):
-    if request.method=='POST':
-        url=ShortURL.objects.filter(user=request.user)
-        ShortURL.objects.filter(id=id).delete()
+    if request.method == "DELETE":
+        with transaction.atomic():
+
+            # Get meta with related core
+            meta = get_object_or_404(
+                ShortURLMeta.objects.select_related("short_url"),
+                id=id,
+                user=request.user
+            )
+
+            core = meta.short_url
+
+            # Delete cache first
+            cache_key = f"short_url:{core.short_code}"
+            cache.delete(cache_key)
+
+            # If Core has on_delete=CASCADE from Meta -> It's already deleted
+            core.delete()
+
+        # Recalculate counts from Meta
+        urls = ShortURLMeta.objects.filter(user=request.user)
+
         return JsonResponse({
             "success":True,
-            "total_urls":url.count(),
-            "active_urls":url.filter(is_active=True).count(),
-            "disabled_urls":url.filter(is_active=False).count()
+            "total_urls":urls.count(),
+            "active_urls":urls.filter(short_url__is_active=True).count(),
+            "disables_urls":urls.filter(short_url__is_active=False).count()
         })
     return None
 
 
-# def redirect_url(request,short_code):
-#     url=get_object_or_404(ShortURL.objects.only("original_url"),
-#                           short_code=short_code,
-#                           is_active=True)
-#
-#     ShortURL.objects.filter(id=url.id).update( #Atomic increment, increment the value safely at the db level. This prevents race condition while multiple user click at a time
-#         click_count=F("click_count") + 1
-#     )
-#
-#
-#
-#     ua = request.META.get("HTTP_USER_AGENT","")
-#     device=detect_device_type(ua)
-#
-#     #store analytics event (details)
-#     ClickEvent.objects.create(
-#         short_url=url,
-#         user_agent=request.META.get("HTTP_USER_AGENT",""),
-#         device_type=device
-#     )
-#     return redirect(url.original_url)
 
 
 
@@ -449,23 +527,44 @@ def redirect_url(request,short_code):
 
 
 
-@login_required
-def toggle_url_status(request,ids):
-    url=get_object_or_404(ShortURL,id=ids,user=request.user)
-    url.is_active=not url.is_active
-    url.save(update_fields=["is_active"])
-    return redirect("list")
 
-def toggle_url_ajax(request,id):
-    if request.method == 'POST':
-        url=get_object_or_404(ShortURL,id=id,user=request.user)
-        url.is_active=not url.is_active
-        url.save(update_fields=["is_active"])
+
+def toggle_url_ajax(request, id):
+    if request.method == "POST":
+        with transaction.atomic():
+            meta = get_object_or_404(
+                ShortURLMeta.objects.select_related("short_url"),
+                id=id,
+                user=request.user
+            )
+
+            core = meta.short_url
+
+            core.is_active = not core.is_active
+            core.save(update_fields=["is_active"])
+
+            cache_key = f"short_url:{core.short_code}"
+            cache.delete(cache_key)
+
+        active_count = ShortURLMeta.objects.filter(
+            user=request.user,
+            short_url__is_active=True
+        ).count()
+
+        disabled_count = ShortURLMeta.objects.filter(
+            user=request.user,
+            short_url__is_active=False
+        ).count()
+
         return JsonResponse({
-        'status':url.is_active,
-        'active_url':ShortURL.objects.filter(user=request.user,is_active=True).count(),
-        'disabled_url':ShortURL.objects.filter(user=request.user, is_active=False).count()
+            "success":"True",
+            "status":core.is_active,
+            "active_count":active_count,
+            "disabled_count":disabled_count
         })
+    return JsonResponse({
+        "success":"False"
+    })
 
 
 
@@ -535,11 +634,19 @@ def url_click_stats(request,url_id):
 
 @login_required
 def dashboard_stats(request):
-    urls = ShortURL.objects.filter(user=request.user)
+    # urls = ShortURL.objects.filter(user=request.user)
+
+    urls = (
+        ShortURLMeta.objects
+        .filter(user=request.user)
+        .select_related("short_url")
+        .order_by("-short_url__created_at")
+    )
 
     total_clicks = urls.aggregate(
         total=Sum("click_count")
     )["total"] or 0
+    print(total_clicks)
 
     url_stats = {
         url.id: url.click_count
@@ -551,11 +658,18 @@ def dashboard_stats(request):
         "urls": url_stats
     })
 
+
+
+
 @login_required
 def analytics_view(request,url_id):
-    url=get_object_or_404(ShortURL,id=url_id,user=request.user)
+    url = get_object_or_404(
+        ShortURLMeta.objects.select_related("short_url"),
+        id=url_id,
+        user=request.user
+    )
     # base queryset
-    clicks = ClickEvent.objects.filter(short_url=url)
+    clicks = ClickEvent.objects.filter(short_url=url.short_url)
     #Read range from query params
     range_params=request.GET.get("range")
     start_params=request.GET.get("start")

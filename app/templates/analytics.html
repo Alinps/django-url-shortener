@@ -42,8 +42,8 @@
 
       <div class="stat-card">
         <span class="stat-label">Status</span>
-        <span class="stat-value {% if url.is_active %}active{% else %}disabled{% endif %}">
-          {% if url.is_active %}Active{% else %}Disabled{% endif %}
+        <span class="stat-value {% if url.short_url.is_active %}active{% else %}disabled{% endif %}">
+          {% if url.short_url.is_active %}Active{% else %}Disabled{% endif %}
         </span>
       </div>
     </div>
@@ -88,7 +88,7 @@
 
   <div class="analytics-card chart-samll chart-pie">
     <h3>Device Distribution</h3>
-    {%if device_counts%}
+    {%if device_counts %}
     <canvas class="chart-center" id="deviceChart" height="220"></canvas>
     {%else%}
     <p>No devices data for this range.</p>

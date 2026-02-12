@@ -75,14 +75,14 @@
 
     <!-- Title -->
     <div class="cell cell-title">
-      <img src="https://www.google.com/s2/favicons?domain={{ url.original_url }}" alt="">
+      <img src="https://www.google.com/s2/favicons?domain={{ url.short_url.original_url }}" alt="">
       <span class="title">{{ url.title }}</span>
     </div>
 
     <!-- URLs -->
     <div class="cell cell-links">
-      <a href="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}" id="short-url-{{ url.id }}" target="_blank">
-        {{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}
+      <a href="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_url.short_code }}" id="short-url-{{ url.id }}" target="_blank">
+        {{ request.scheme }}://{{ request.get_host }}/{{ url.short_url.short_code }}
       </a>
       <span class="original-url original">{{ url.original_url }}</span>
     </div>
@@ -103,28 +103,28 @@
 
     <!-- Status -->
     <div class="cell cell-status">
-      <span class="status-pill {% if url.is_active %}active{% else %}disabled{% endif %}" id="toggleStatus_{{ url.id }}">
-        {% if url.is_active %}Active{% else %}Disabled{% endif %}
+      <span class="status-pill {% if url.short_url.is_active %}active{% else %}disabled{% endif %}" id="toggleStatus_{{ url.id }}">
+        {% if url.short_url.is_active %}Active{% else %}Disabled{% endif %}
       </span>
     </div>
 
     <!-- Actions -->
     <div class="cell cell-actions">
-      <span class="icon-btn {% if url.is_active %}active{% endif %}"
+      <span class="icon-btn {% if url.short_url.is_active %}active{% endif %}"
             onclick="toggleStatus('{{ url.id }}')">⏻</span>
 
       <span class="icon-btn edit"
-            onclick="openEdit('{{ url.id }}','{{ url.title }}','{{ url.original_url }}','{{ url.short_code }}')">📝</span>
+            onclick="openEdit('{{ url.id }}')">📝</span>
 
       <span class="icon-btn delete"
             onclick="openDelete('{{ url.id }}')">🗑</span>
 
-{#      <span class="icon-btn copy"#}
-{#            data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"#}
-{#            onclick="copyToClipboard(this)">📋</span>#}
+<!--{#      <span class="icon-btn copy"#}-->
+<!--{#            data-url="{{ request.scheme }}://{{ request.get_host }}/redirect/{{ url.short_code }}"#}-->
+<!--{#            onclick="copyToClipboard(this)">📋</span>#}-->
 
       <a class="icon-btn share"
-        data-url="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_code }}"
+        data-url="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_url.short_code }}"
          onclick="openShare({{ url.id }})">
         <img src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff" width="20px" height="20px">
       </a>

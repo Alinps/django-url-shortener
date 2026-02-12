@@ -12,7 +12,6 @@ urlpatterns = [
     path('update/<int:id>/',views.update_url,name='update'),
     path("delete/<int:id>/",views.delete_url,name='delete'),
     path("<str:short_code>",views.redirect_url,name="redirect"),
-    path("togglestatus/<int:ids>",views.toggle_url_status,name="toggle"),
     path("togglestatusajax/<int:id>",views.toggle_url_ajax,name="toggle_ajax"),
     path("aboutus/",views.aboutus,name="aboutus"),
     path("forgotpassword/",views.forgot_password,name="forgotpassword"),

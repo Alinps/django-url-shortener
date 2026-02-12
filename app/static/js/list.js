@@ -32,11 +32,18 @@ const searchInput = searchForm.querySelector("input");
 
 
 //logic for edit modal
-function openEdit(id, title, url,short_code) {
-  document.getElementById("edit-id").value = id;
-  document.getElementById("edit-title").value = title;
-  document.getElementById("edit-url").value = url;
-  document.getElementById("edit-short_code").value = short_code
+function openEdit(id) {
+   fetch(`/update/${id}`)
+   .then(res => res.json())
+   .then(data =>{
+   console.log(data)
+        document.getElementById("edit-id").value = data.id;
+        document.getElementById("edit-title").value = data.title;
+        document.getElementById("edit-url").value = data.original_url;
+        document.getElementById("edit-short_code").value = data.custom_url
+   })
+
+
   // document.getElementById("edit-status").value = isActive === "True" ? "true" : "false";
 
   document.getElementById("editModal").style.display = "flex";
@@ -53,7 +60,7 @@ document.getElementById("editForm").addEventListener("submit", function(e) {
   const id = document.getElementById("edit-id").value;
 
   fetch(`/update/${id}/`, {
-    method: "POST",
+    method: "PUT",
     headers: {
       "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
       "Content-Type": "application/json"
@@ -123,7 +130,7 @@ function closeDelete() {
 //logic for delete ajax
 function confirmDelete() {
   fetch(`/delete/${deleteId}/`, {
-    method: "POST",
+    method: "DELETE",
     headers: {
       "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
     }
@@ -314,18 +321,40 @@ searchInput.addEventListener("keydown", (e) => {
   }
 });
 
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie("csrftoken");
+
+
+
+
 function toggleStatus(id) {
   fetch(`/togglestatusajax/${id}`, {
-    method: "POST",
-    headers: {
-      "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
-    }
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        }
   })
   .then(res => res.json())
   .then(data => {
+  console.log(data)
     const statusEl = document.getElementById(`toggleStatus_${id}`);
-
-    if (data.status) {
+if (data.success){
+ if (data.status) {
       statusEl.textContent = "Active";
       statusEl.classList.add("active");
       statusEl.classList.remove("disabled");
@@ -335,8 +364,13 @@ function toggleStatus(id) {
       statusEl.classList.add("disabled");
     }
 
-    document.getElementById('active_urls').textContent = data.active_url;
-    document.getElementById('disabled_urls').textContent = data.disabled_url;
+    document.getElementById('active_urls').textContent = data.active_count;
+    document.getElementById('disabled_urls').textContent = data.disabled_count;
+    showToast("Status changed successfully","success");
+}else{
+    showToast("Status not changed","error");
+}
+
   });
 }
 
