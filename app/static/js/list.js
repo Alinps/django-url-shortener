@@ -1,6 +1,3 @@
-
-
-
 //logic for edit modal
 function openEdit(id) {
    fetch(`/update/${id}`)
@@ -132,6 +129,8 @@ const csrftoken = getCookie("csrftoken");
 
 
 
+
+// Ajax for toggle status change"
 function toggleStatus(id) {
   fetch(`/togglestatusajax/${id}`, {
         method: "POST",
@@ -213,8 +212,9 @@ function copyShareLink() {
 
 
 
-//url click count status increment
 
+
+//url click count status increment
 function updateDashboardStats() {
   fetch("/dashboard/stats/")
     .then(res => res.json())
@@ -241,7 +241,7 @@ function updateDashboardStats() {
 
 
 
-// Poll every
+// Polling logic
 let statsInterval;
 
 function startPolling() {
@@ -294,7 +294,7 @@ function showToast(message, type = "info", duration = 3000) {
 
 
 
-
+// Ajax for searching url
 const searchInput = document.querySelector('input[name="q"]');
 const urlContainer = document.getElementById("urlCardContainer");
 const paginationContainer = document.querySelector(".pagination");

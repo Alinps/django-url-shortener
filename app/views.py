@@ -15,7 +15,7 @@ from .forms import SignUp,login_form
 from .tasks import record_click_event
 from .utils.id_generator import get_next_short_id
 from .utils.shortcode_validator import  is_valid_custom_code
-from .models import ShortURL,ClickEvent,ShortURLCore, ShortURLMeta
+from .models import ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
@@ -30,6 +30,11 @@ from django.db import DataError, IntegrityError, transaction
 import traceback
 from .utils.base62 import encode_base62
 from django.core.cache import cache
+from django.db.models import Q, Sum
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
@@ -58,17 +63,12 @@ def login_user(request):
         form=login_form(data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            print(user)
             login(request,user)
-            print(request.POST)
             return redirect('home')
     else:
         form=login_form()
     return render(request,'login.html',{'form':form})
 
-# @login_required
-# def home_page(request):
-#     return render(request,'home.html')
 
 
 @never_cache
@@ -79,62 +79,6 @@ def logout_user(request):
         logout(request)
         return redirect('login')
     return render(request,'logout.html')
-
-
-# @never_cache
-# @login_required
-# @csrf_protect
-# def home_page(request):
-#     if request.method == "POST":
-#         original_url=request.POST.get("original_url")
-#         title=request.POST.get("title")
-#         custom_code=request.POST.get("custom_code","").strip()
-#
-#         try:
-#             #CASE 1 : User wants a custom shortcode
-#             if custom_code:
-#                 if not is_valid_custom_code(custom_code):
-#                     messages.error(request, "Invalid short URL format")
-#                     return redirect("home")
-#
-#                 #Attempt to create directly
-#                 short_url = ShortURL.objects.create(
-#                     user=request.user,
-#                     original_url=original_url,
-#                     short_code=custom_code,
-#                     title=title
-#                 )
-#
-#             #CASE 2 : Auto-generate shortcode (production way)
-#             else:
-#                 # Step 1 : Create row without short_code
-#                 short_url=ShortURL.objects.create(
-#                     user=request.user,
-#                     original_url=original_url,
-#                     title=title
-#                 )
-#                 # Step 2: generate deterministic code
-#                 short_url.short_code = encode_base62(short_url.id)
-#
-#                 # Step 3: update only short_code
-#                 short_url.save(update_fields=["short_code"])
-#
-#             messages.success(request, "URL shortneed successfully")
-#             return redirect("list")
-#
-#         except IntegrityError:
-#             # Triggered when custom_code already exists
-#             messages.error(request, "Short URL already exists")
-#             return redirect("home")
-#
-#         except DataError:
-#             messages.error(request,"The URL is too long or Invalid.")
-#             return redirect("home")
-#
-#     return render(request, "home.html")
-
-
-
 
 
 
@@ -190,43 +134,6 @@ def home_page(request):
 
 
 
-# @never_cache
-# @login_required
-# def list_url(request):
-#     query = request.GET.get("q","")
-#
-#     urls = (
-#         ShortURLMeta.objects
-#         .filter(user=request.user)
-#         .select_related("short_url")
-#         .order_by("-short_url__created_at")
-#     )
-#
-#
-#     if query:
-#         urls = urls.filter(title__icontains=query)
-#
-#     paginator = Paginator(urls,10)
-#     page_number = request.GET.get("page")
-#     url_qs = paginator.get_page(page_number)
-#
-#     total_clicks=urls.aggregate(
-#         total=Sum("click_count")
-#     )["total"] or 0
-#
-#     total_urls = urls.count()
-#     active_urls = urls.filter(short_url__is_active=True).count()
-#     disabled_urls = urls.filter(short_url__is_active=False).count()
-#     print("active_urls",active_urls)
-#     print("disabled_urls",disabled_urls)
-#
-#     return render(request, "list.html",{
-#         "urls":url_qs,
-#         "total_clicks":total_clicks,
-#         "total_urls":total_urls,
-#         "active_urls":active_urls,
-#         "disabled_urls":disabled_urls
-#     })
 
 
 
@@ -235,13 +142,6 @@ def home_page(request):
 
 
 
-
-
-from django.db.models import Q, Sum
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
-from django.views.decorators.cache import never_cache
 
 @never_cache
 @login_required
@@ -317,100 +217,6 @@ def list_url(request):
 
 
 
-# @never_cache
-# @login_required
-# @csrf_protect
-# def home_page(request):
-#     if request.method == 'POST':
-#         original_url = request.POST.get("original_url")
-#         title = request.POST.get("title")
-#         custom_code = request.POST.get("custom_code", "").strip()
-#
-#         print("CUSTOM_CODE:", custom_code)
-#
-#         # Decide short_code
-#         if custom_code:
-#             if not is_valid_custom_code(custom_code):
-#                 messages.error(request, "Invalid short URL format")
-#                 return redirect("home")
-#
-#             if ShortURL.objects.filter(short_code__iexact=custom_code).exists():
-#                 messages.error(request, "Short URL already exists")
-#                 return redirect("home")
-#
-#             short_code = custom_code
-#         else:
-#             while True:
-#                 short_code = short_code_generator()
-#                 if not ShortURL.objects.filter(short_code=short_code).exists():
-#                     break
-#
-#         try:
-#             ShortURL.objects.create(
-#                 user=request.user,
-#                 original_url=original_url,
-#                 short_code=short_code,
-#                 title=title
-#             )
-#             messages.success(request, "URL shortened successfully")
-#             return redirect("list")
-#
-#         except DataError:
-#             messages.error(
-#                 request,
-#                 "The URL is too long. Please enter a shorter or valid URL."
-#             )
-#             return redirect("home")
-#     return render(request, "home.html")
-
-# @never_cache
-# @login_required
-# def list_url(request):
-#     query=request.GET.get("q","")
-#     urls = ShortURL.objects.filter(user=request.user).order_by("-created_at")
-#     if query:
-#         urls=urls.filter(title__icontains=query)
-#     paginator = Paginator(urls, 10)  # 10 urls per page
-#     page_number = request.GET.get("page")
-#     url_qs = paginator.get_page(page_number)
-#
-#     total_clicks=urls.aggregate(
-#         total=Sum("click_count")
-#     )["total"] or 0    #if no url Sum returns none, "or 0" prevents template crashes
-#     total_urls=urls.count()
-#     active_urls=urls.filter(is_active=True).count()
-#     disabled_urls=urls.filter(is_active=False).count()
-#     return render(request,"list.html",{
-#         "urls":url_qs,
-#         "total_clicks":total_clicks,
-#         "total_urls":total_urls,
-#         "active_urls":active_urls,
-#         "disabled_urls":disabled_urls
-#         })
-
-
-
-#ajax search
-# app/views.py
-@login_required
-def search_urls(request):
-    query = request.GET.get("q", "").strip()
-
-    urls = (
-        ShortURL.objects
-        .filter(user=request.user, title__icontains=query)
-        .values(
-            "id",
-            "title",
-            "original_url",
-            "short_code",
-            "click_count",
-            "is_active",
-            "created_at"
-        )
-    )
-
-    return JsonResponse({"results": list(urls)})
 
 
 
@@ -705,20 +511,19 @@ def verify_reset_otp(request):
     return render(request,"reset_password.html")
 
 
-def url_click_stats(request,url_id):
-    print(url_id)
-    url=ShortURL.objects.get(id=url_id,user=request.user)
-    total_clicks=ShortURL.objects.filter(user=request.user).aggregate(total=Sum("click_count"))["total"] or 0
-    return JsonResponse({
-        "click_count":url.click_count,
-        "total_clicks":total_clicks
-    })
+# def url_click_stats(request,url_id):
+#     print(url_id)
+#     url=ShortURL.objects.get(id=url_id,user=request.user)
+#     total_clicks=ShortURL.objects.filter(user=request.user).aggregate(total=Sum("click_count"))["total"] or 0
+#     return JsonResponse({
+#         "click_count":url.click_count,
+#         "total_clicks":total_clicks
+#     })
 
 
 
 @login_required
 def dashboard_stats(request):
-    # urls = ShortURL.objects.filter(user=request.user)
 
     urls = (
         ShortURLMeta.objects

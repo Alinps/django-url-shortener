@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.db.models import F
-from .models import ShortURL, ClickEvent, ShortURLMeta
+from .models import  ClickEvent, ShortURLMeta
 
 
 @shared_task(bind=True,autoretry_for=(Exception,),retry_kwargs={"max_retries":3, "countdown":5})

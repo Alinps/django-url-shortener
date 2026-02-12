@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 
-from .models import ShortURL, ClickEvent
+from .models import  ClickEvent
 
 admin.site.register(ClickEvent)
 
