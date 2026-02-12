@@ -237,9 +237,11 @@ const btn = document.getElementById("refreshStatsBtn");
           el.innerText = clickCount;
         }
       }
+      showToast("Stats Refreshed!")
     })
     .catch(err => {
       console.error("Dashboard polling failed", err);
+      showToast("Something went wrong, can't refresh stats!","error")
     })
      .finally(() => {
       btn.classList.remove("loading");
