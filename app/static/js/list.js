@@ -215,7 +215,12 @@ function copyShareLink() {
 
 
 //url click count status increment
+document.getElementById("refreshStatsBtn").addEventListener("click", updateDashboardStats);
 function updateDashboardStats() {
+
+const btn = document.getElementById("refreshStatsBtn");
+  btn.classList.add("loading");
+
   fetch("/dashboard/stats/")
     .then(res => res.json())
     .then(data => {
@@ -235,32 +240,37 @@ function updateDashboardStats() {
     })
     .catch(err => {
       console.error("Dashboard polling failed", err);
+    })
+     .finally(() => {
+      btn.classList.remove("loading");
     });
+
+
 }
 
 
 
 
-// Polling logic
-let statsInterval;
-
-function startPolling() {
-  statsInterval = setInterval(updateDashboardStats, 15000);
-}
-
-function stopPolling() {
-  clearInterval(statsInterval);
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    stopPolling();
-  } else {
-    startPolling();
-  }
-});
-
-startPolling();
+//// Polling logic
+//let statsInterval;
+//
+//function startPolling() {
+//  statsInterval = setInterval(updateDashboardStats, 15000);
+//}
+//
+//function stopPolling() {
+//  clearInterval(statsInterval);
+//}
+//
+//document.addEventListener("visibilitychange", () => {
+//  if (document.hidden) {
+//    stopPolling();
+//  } else {
+//    startPolling();
+//  }
+//});
+//
+//startPolling();
 
 
 
