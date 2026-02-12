@@ -1,34 +1,4 @@
-function copyToClipboard(button){
-    const textToCopy=button.getAttribute("data-url");
-    navigator.clipboard.writeText(textToCopy)
-        .then(()=>{
-            alert("URL Coppied to Clipboard");
-        })
-        .catch((err)=>{
-            console.log("Failed to copy: ",err);
-            alert("Copy failed");
-        })
-}
 
-
-// const searchToggle = document.getElementById("searchToggle");
-const searchForm = document.getElementById("searchForm");
-const searchInput = searchForm.querySelector("input");
-//
-// searchToggle.addEventListener("click", () => {
-//   searchForm.classList.toggle("hidden");
-//
-//   if (!searchForm.classList.contains("hidden")) {
-//     searchInput.focus();
-//   }
-// });
-//
-// // Optional: ESC key hides search
-// document.addEventListener("keydown", (e) => {
-//   if (e.key === "Escape") {
-//     searchForm.classList.add("hidden");
-//   }
-// });
 
 
 //logic for edit modal
@@ -99,19 +69,6 @@ function updateRowUI(id, data) {
   row.querySelector(".original").textContent = data.original_url;
   shortUrlEl.href = shortUrl;
   shortUrlEl.innerHTML = shortUrl;
-
-  // Update status pill
-  // const statusSpan = row.querySelector(".status-pill");
-
-  // if (data.is_active) {
-  //   statusSpan.textContent = "Active";
-  //   statusSpan.classList.remove("disabled");
-  //   statusSpan.classList.add("active");
-  // } else {
-  //   statusSpan.textContent = "Disabled";
-  //   statusSpan.classList.remove("active");
-  //   statusSpan.classList.add("disabled");
-  // }
 }
 
 
@@ -152,174 +109,7 @@ function confirmDelete() {
 }
 
 
-//ajax search logic
-// ========================
-// DOM ELEMENTS
-// ========================
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric"
-  });
-}
-
-
-const suggestionsBox = document.getElementById("suggestions");
-const urlCardContainer = document.getElementById("urlCardContainer");
-
-let debounceTimer;
-
-// Store original cards (Django-rendered)
-const originalCardsHTML = urlCardContainer.innerHTML;
-
-
-// ========================
-// SEARCH INPUT HANDLER
-// ========================
-searchInput.addEventListener("input", () => {
-  clearTimeout(debounceTimer);
-
-  debounceTimer = setTimeout(() => {
-    const query = searchInput.value.trim();
-
-    // 🔄 Restore original cards when input is empty
-    if (!query) {
-      suggestionsBox.innerHTML = "";
-      suggestionsBox.classList.remove("show");
-      urlCardContainer.innerHTML = originalCardsHTML;
-      return;
-    }
-
-    fetch(`/search/?q=${encodeURIComponent(query)}`)
-      .then(res => res.json())
-      .then(data => {
-        renderSuggestions(data.results);
-        renderCards(data.results);
-      })
-      .catch(err => {
-        console.error("Search error:", err);
-      });
-
-  }, 300); // debounce delay
-});
-
-
-// ========================
-// SUGGESTIONS DROPDOWN
-// ========================
-function renderSuggestions(results) {
-  suggestionsBox.innerHTML = "";
-
-  if (!results || results.length === 0) {
-    suggestionsBox.classList.remove("show");
-    return;
-  }
-
-  results.forEach(item => {
-    const li = document.createElement("li");
-    li.textContent = item.title;
-
-    li.onclick = () => {
-      searchInput.value = item.title;
-      suggestionsBox.innerHTML = "";
-      suggestionsBox.classList.remove("show");
-    };
-
-    suggestionsBox.appendChild(li);
-  });
-
-  suggestionsBox.classList.add("show");
-}
-
-
-// ========================
-// CARD RENDERING
-// ========================
-function renderCards(results) {
-  urlCardContainer.innerHTML = ""; // 🔥 clear before rendering
-
-  if (!results || results.length === 0) {
-    urlCardContainer.innerHTML = `
-      <div class="url-card">
-        <p>No link to show.</p>
-      </div>
-    `;
-    return;
-  }
-
-  results.forEach(url => {
-    urlCardContainer.innerHTML += `
-      <div class="url-card" id="card-${url.id}">
-
-        <!-- Title -->
-        <div class="cell cell-title">
-          <img src="https://www.google.com/s2/favicons?domain=${url.original_url}" alt="">
-          <span>${url.title}</span>
-        </div>
-
-        <!-- URLs -->
-        <div class="cell cell-links">
-          <a href="/redirect/${url.short_code}" class="short-link">
-            ${window.location.origin}/${url.short_code}
-          </a>
-          <span class="original-url">${url.original_url}</span>
-        </div>
-
-        <!-- Date -->
-        <div class="cell cell-date">
-          📅 ${formatDate(url.created_at)}
-        </div>
-
-        <!-- Clicks -->
-        <div class="cell cell-clicks">
-          👁 ${url.click_count}
-        </div>
-
-        <!-- Status -->
-        <div class="cell cell-status">
-          <span
-            class="status-pill ${url.is_active ? "active" : "disabled"}"
-            id="toggleStatus_${url.id}">
-            ${url.is_active ? "Active" : "Disabled"}
-          </span>
-        </div>
-
-        <!-- Actions -->
-        <div class="cell cell-actions">
-          <span class="icon-btn ${url.is_active ? "active" : ""}"
-                onclick="toggleStatus('${url.id}')">⏻</span>
-
-          <span class="icon-btn edit"
-                onclick="openEdit('${url.id}','${url.title}','${url.original_url}')">📝</span>
-
-          <span class="icon-btn delete"
-                onclick="openDelete('${url.id}')">🗑</span>
-
-          <span class="icon-btn copy"
-                data-url="${window.location.origin}/redirect/${url.short_code}"
-                onclick="copyToClipboard(this)">📋</span>
-        </div>
-
-      </div>
-    `;
-  });
-}
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".search-wrapper")) {
-    suggestionsBox.classList.remove("show");
-  }
-});
-searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    suggestionsBox.classList.remove("show");
-    searchInput.blur();
-  }
-});
 
 
 function getCookie(name) {
@@ -424,7 +214,6 @@ function copyShareLink() {
 
 
 //url click count status increment
-//
 
 function updateDashboardStats() {
   fetch("/dashboard/stats/")
@@ -449,8 +238,30 @@ function updateDashboardStats() {
     });
 }
 
-// Poll every 5 seconds
-setInterval(updateDashboardStats, 5000);
+
+
+
+// Poll every
+let statsInterval;
+
+function startPolling() {
+  statsInterval = setInterval(updateDashboardStats, 15000);
+}
+
+function stopPolling() {
+  clearInterval(statsInterval);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    startPolling();
+  }
+});
+
+startPolling();
+
 
 
 
@@ -474,3 +285,132 @@ function showToast(message, type = "info", duration = 3000) {
     setTimeout(() => toast.remove(), 300);
   }, duration);
 }
+
+
+
+
+
+
+
+
+
+
+const searchInput = document.querySelector('input[name="q"]');
+const urlContainer = document.getElementById("urlCardContainer");
+const paginationContainer = document.querySelector(".pagination");
+
+let debounceTimer;
+let currentPage = 1;
+let controller;
+function fetchResults(query = "", page = 1) {
+
+  if (controller) controller.abort();
+  controller = new AbortController();
+
+  fetch(`/list/?q=${encodeURIComponent(query)}&page=${page}`, {
+    headers: { "X-Requested-With": "XMLHttpRequest" },
+    signal: controller.signal
+  })
+    .then(res => res.json())
+    .then(data => {
+      renderCards(data.results);
+      renderPagination(data.pagination, query);
+      updateStats(data.stats);
+
+      // Update URL without reload
+      history.pushState(null, "", `?q=${query}&page=${page}`);
+    })
+    .catch(err => console.error("Search error:", err));
+}
+
+
+function renderCards(results) {
+  urlContainer.innerHTML = "";
+
+  if (!results.length) {
+    urlContainer.textContent = "No links found.";
+    return;
+  }
+
+  results.forEach(url => {
+
+    const card = document.createElement("div");
+    card.className = "url-card";
+
+    card.innerHTML = `
+      <div class="cell cell-title">
+        <img src="https://www.google.com/s2/favicons?domain=${url.original_url}">
+        <span>${url.title}</span>
+      </div>
+
+      <div class="cell cell-links">
+        <a href="${BASE_URL}/${url.short_code}" target="_blank">
+          ${BASE_URL}/${url.short_code}
+        </a>
+        <span class="original-url">${url.original_url}</span>
+      </div>
+
+      <div class="cell cell-date">
+        ${url.created_at}
+      </div>
+
+      <div class="cell cell-clicks">
+        👁 ${url.click_count}
+      </div>
+
+      <div class="cell cell-status">
+        <span class="status-pill ${url.is_active ? "active" : "disabled"}">
+          ${url.is_active ? "Active" : "Disabled"}
+        </span>
+      </div>
+    `;
+
+    urlContainer.appendChild(card);
+  });
+}
+
+
+
+
+function renderPagination(pagination, query) {
+
+  paginationContainer.innerHTML = "";
+
+  if (pagination.has_previous) {
+    const prev = document.createElement("button");
+    prev.textContent = "← Previous";
+    prev.onclick = () => fetchResults(query, pagination.current_page - 1);
+    paginationContainer.appendChild(prev);
+  }
+
+  const info = document.createElement("span");
+  info.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+  paginationContainer.appendChild(info);
+
+  if (pagination.has_next) {
+    const next = document.createElement("button");
+    next.textContent = "Next →";
+    next.onclick = () => fetchResults(query, pagination.current_page + 1);
+    paginationContainer.appendChild(next);
+  }
+}
+
+
+
+function updateStats(stats) {
+  document.getElementById("total_urls").textContent = stats.total_urls;
+  document.getElementById("active_urls").textContent = stats.active_urls;
+  document.getElementById("disabled_urls").textContent = stats.disabled_urls;
+  document.getElementById("total").textContent = stats.total_clicks;
+}
+
+
+searchInput.addEventListener("input", () => {
+
+  clearTimeout(debounceTimer);
+
+  debounceTimer = setTimeout(() => {
+    currentPage = 1;
+    fetchResults(searchInput.value.trim(), 1);
+  }, 300);
+});

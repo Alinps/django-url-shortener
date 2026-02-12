@@ -190,10 +190,64 @@ def home_page(request):
 
 
 
+# @never_cache
+# @login_required
+# def list_url(request):
+#     query = request.GET.get("q","")
+#
+#     urls = (
+#         ShortURLMeta.objects
+#         .filter(user=request.user)
+#         .select_related("short_url")
+#         .order_by("-short_url__created_at")
+#     )
+#
+#
+#     if query:
+#         urls = urls.filter(title__icontains=query)
+#
+#     paginator = Paginator(urls,10)
+#     page_number = request.GET.get("page")
+#     url_qs = paginator.get_page(page_number)
+#
+#     total_clicks=urls.aggregate(
+#         total=Sum("click_count")
+#     )["total"] or 0
+#
+#     total_urls = urls.count()
+#     active_urls = urls.filter(short_url__is_active=True).count()
+#     disabled_urls = urls.filter(short_url__is_active=False).count()
+#     print("active_urls",active_urls)
+#     print("disabled_urls",disabled_urls)
+#
+#     return render(request, "list.html",{
+#         "urls":url_qs,
+#         "total_clicks":total_clicks,
+#         "total_urls":total_urls,
+#         "active_urls":active_urls,
+#         "disabled_urls":disabled_urls
+#     })
+
+
+
+
+
+
+
+
+
+
+from django.db.models import Q, Sum
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.views.decorators.cache import never_cache
+
 @never_cache
 @login_required
+@require_GET
 def list_url(request):
-    query = request.GET.get("q","")
+    query = request.GET.get("q", "").strip()
 
     urls = (
         ShortURLMeta.objects
@@ -202,31 +256,61 @@ def list_url(request):
         .order_by("-short_url__created_at")
     )
 
-
     if query:
-        urls = urls.filter(title__icontains=query)
+        urls = urls.filter(
+            Q(title__icontains=query) |
+            Q(short_url__original_url__icontains=query) |
+            Q(short_url__short_code__icontains=query)
+        ).distinct()
 
-    paginator = Paginator(urls,10)
+    paginator = Paginator(urls, 10)
     page_number = request.GET.get("page")
-    url_qs = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
 
-    total_clicks=urls.aggregate(
-        total=Sum("click_count")
-    )["total"] or 0
-
+    total_clicks = urls.aggregate(total=Sum("click_count"))["total"] or 0
     total_urls = urls.count()
     active_urls = urls.filter(short_url__is_active=True).count()
     disabled_urls = urls.filter(short_url__is_active=False).count()
-    print("active_urls",active_urls)
-    print("disabled_urls",disabled_urls)
 
-    return render(request, "list.html",{
-        "urls":url_qs,
-        "total_clicks":total_clicks,
-        "total_urls":total_urls,
-        "active_urls":active_urls,
-        "disabled_urls":disabled_urls
+    # 👇 AJAX detection
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        results = []
+        for url in page_obj:
+            results.append({
+                "id": url.id,
+                "title": url.title,
+                "original_url": url.short_url.original_url,
+                "short_code": url.short_url.short_code,
+                "click_count": url.click_count,
+                "is_active": url.short_url.is_active,
+                "created_at": url.short_url.created_at.strftime("%b %d, %Y"),
+            })
+
+        return JsonResponse({
+            "results": results,
+            "pagination": {
+                "has_previous": page_obj.has_previous(),
+                "has_next": page_obj.has_next(),
+                "current_page": page_obj.number,
+                "total_pages": paginator.num_pages,
+            },
+            "stats": {
+                "total_urls": total_urls,
+                "active_urls": active_urls,
+                "disabled_urls": disabled_urls,
+                "total_clicks": total_clicks,
+            }
+        })
+
+    # Normal HTML render
+    return render(request, "list.html", {
+        "urls": page_obj,
+        "total_clicks": total_clicks,
+        "total_urls": total_urls,
+        "active_urls": active_urls,
+        "disabled_urls": disabled_urls,
     })
+
 
 
 
