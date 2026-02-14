@@ -28,7 +28,7 @@ from django.contrib.auth.hashers import make_password
 from django.views.decorators.cache import never_cache
 from django.db import DataError, IntegrityError, transaction
 import traceback
-from .utils.base62 import encode_base62
+from .utils.base62 import encode_base62,obfuscate_id
 from django.core.cache import cache
 from django.db.models import Q, Sum
 from django.core.paginator import Paginator
@@ -108,7 +108,8 @@ def home_page(request):
 
                 else:
                     counter = get_next_short_id()
-                    short_code = encode_base62(counter)
+                    obfuscate = obfuscate_id(counter)
+                    short_code = encode_base62(obfuscate)
 
                     core = ShortURLCore.objects.create(
                         short_code=short_code,

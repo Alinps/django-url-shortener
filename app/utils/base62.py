@@ -1,3 +1,5 @@
+from django.conf import settings
+
 BASE62_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 BASE = len(BASE62_CHARS)
 
@@ -12,3 +14,7 @@ def encode_base62(num: int) -> str:
         num=num//BASE
     #reverse because we built it backwards
     return "".join(reversed(encode))
+
+
+def obfuscate_id(num):
+    return num ^ settings.SHORTCODE_SECRET
