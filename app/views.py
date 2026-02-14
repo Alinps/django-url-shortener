@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+from django.conf import settings
 from django.utils import timezone
 from datetime import datetime
 from django.db.models.functions import TruncDate
@@ -14,6 +16,7 @@ from django.utils import timezone
 from .forms import SignUp,login_form
 from .tasks import record_click_event
 from .utils.id_generator import get_next_short_id
+from .utils.rate_limit import check_rate_limit
 from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
@@ -370,6 +373,13 @@ def delete_url(request,id):
 
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
+
+    ip = request.META.get("REMOTE_ADDR")
+
+    if not check_rate_limit(ip):
+        response = render(request, "rate_limit.html",status=429)
+        response["Retry-After"] = settings.REDIRECT_RATE_WINDOW
+        return response
 
     cache_key=f"short_url:{short_code}"
 
