@@ -16,7 +16,8 @@ from django.utils import timezone
 from .forms import SignUp,login_form
 from .tasks import record_click_event
 from .utils.id_generator import get_next_short_id
-from .utils.rate_limit import check_rate_limit
+from .utils.rate_limit import check_rate_limit, check_create_rate_limit
+from .utils.rate_limit_response import rate_limited_response
 from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
@@ -92,6 +93,19 @@ def logout_user(request):
 @csrf_protect
 def home_page(request):
     if request.method == "POST":
+
+        x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded:
+            ip = x_forwarded.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
+
+        if not check_create_rate_limit(ip,request.user.id):
+            return rate_limited_response(
+                request,
+                settings.CREATE_RATE_WINDOW
+            )
+
         original_url = request.POST.get("original_url")
         title =  request.POST.get("title")
         custom_code = request.POST.get("custom_code")
@@ -374,12 +388,17 @@ def delete_url(request,id):
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
 
-    ip = request.META.get("REMOTE_ADDR")
+    x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded:
+        ip = x_forwarded.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
 
     if not check_rate_limit(ip):
-        response = render(request, "rate_limit.html",status=429)
-        response["Retry-After"] = settings.REDIRECT_RATE_WINDOW
-        return response
+        return rate_limited_response(
+            request,
+            settings.REDIRECT_RATE_WINDOW
+        )
 
     cache_key=f"short_url:{short_code}"
 

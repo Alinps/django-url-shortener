@@ -28,6 +28,9 @@ SECRET_KEY = 'django-insecure-lnp4y38&y)fm=jgi(h+c)s%%^qfj=kq$pv&9%c0h#jru!jh*_m
 SHORTCODE_SECRET = int(os.environ.get('SHORTCODE_SECRET'))
 REDIRECT_RATE_LIMIT=int(os.environ.get('REDIRECT_RATE_LIMIT',100))
 REDIRECT_RATE_WINDOW=int(os.environ.get('REDIRECT_RATE_WINDOW',60))
+CREATE_RATE_LIMIT=int(os.environ.get('CREATE_RATE_LIMIT',20))
+CREATE_RATE_WINDOW=int(os.environ.get('CREATE_RATE_WINDOW',60))
+CREATE_DAILY_LIMIT=int(os.environ.get('CREATE_DAILY_LIMIT',500))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
