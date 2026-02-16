@@ -72,6 +72,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'urlshortner.urls'
 LOGIN_URL = '/login/'
 AUTH_USER_MODEL = 'accounts.CustomUser'
+PASSWORD_RESET_TIMEOUT = 86400  # 24 hours
 
 TEMPLATES = [
     {

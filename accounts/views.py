@@ -1,29 +1,36 @@
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str, DjangoUnicodeDecodeError
 from django.shortcuts import redirect, render
 from .tokens import email_verification_token
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-
 from .utils.verification_email import send_verification_email
 
 
-def activate_account(request,uidb64,token):
+def activate_account(request, uidb64, token):
     User = get_user_model()
     user = None
+
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, ObjectDoesNotExist, DjangoUnicodeDecodeError):
+    except (TypeError, ValueError, OverflowError,DjangoUnicodeDecodeError, User.DoesNotExist):
         user = None
 
-    if user and email_verification_token.check_token(user,token):
-        user.is_active = True
-        user.save()
-        return redirect('login')
-    return render(request,"activation_invalid.html")
+    if user is not None:
+
+        # If already activated
+        if user.is_active:
+            return redirect("login")
+
+        if email_verification_token.check_token(user, token):
+            user.is_active = True
+            user.save(update_fields=["is_active"])
+            return render(request, "activation_success.html")
+
+    return render(request, "activation_invalid.html")
+
 
 
 User = get_user_model()
