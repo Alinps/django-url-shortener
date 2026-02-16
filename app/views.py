@@ -39,6 +39,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.views.decorators.cache import never_cache
+from accounts.utils.verification_email import send_verification_email
 
 
 # Create your views here.
@@ -56,9 +57,14 @@ def register(request):
     if request.method=='POST':
         form=SignUp(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:   
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+
+            send_verification_email(request,user)
+
+            return render(request, "verify_email_sent.html")
+    else:
         form=SignUp()
     return render(request,'signup.html',{'form':form})
 
@@ -67,6 +73,10 @@ def login_user(request):
         form=login_form(data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            if not user.is_active:
+                messages.warning(request,
+                                 "Your account is not activated. Please verify your email.")
+                return redirect("resend_activation")
             login(request,user)
             return redirect('home')
     else:
