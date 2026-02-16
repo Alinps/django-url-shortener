@@ -10,5 +10,6 @@ def check_register_rate_limit(ip):
     elif count >= settings.REGISTER_RATE_LIMIT:
         return False
     else:
-        cache.incr(key)
+        counter = cache.incr(key)
+        print("register counter: ",counter)
     return True

@@ -8,7 +8,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from accounts.forms import SignUp, login_form
-from app.models import PasswordResetOTP
+
 from accounts.utils.mail_sender import send_reset_otp
 from accounts.utils.otp_generate import generate_otp
 from app.utils.rate_limit_response import rate_limited_response
@@ -17,7 +17,9 @@ from django.contrib.auth import get_user_model, login,logout
 from django.core.cache import cache
 from .utils.check_login_rate_limit import check_login_rate_limit
 from .utils.check_register_rate_limit import check_register_rate_limit
+from .utils.otp_utils import store_otp,verify_otp
 from .utils.verification_email import send_verification_email
+
 
 
 
@@ -157,17 +159,28 @@ def resend_activation(request):
 def forgot_password(request):
     if request.method=="POST":
         email=request.POST.get("email")
-        if not User.objects.filter(email=email).exists():
-            return render(request,"forgot_password.html",{
-                "error":"No account found with this email"
-            })
-        otp=generate_otp()
-        PasswordResetOTP.objects.create(
-            email=email,
-            otp=otp
-        )
-        send_reset_otp(email,otp)
-        request.session["reset_email"]=email
+
+        # Always respond same (prevent enumeration)
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            cooldown_key = f"reset_cooldown:{email}"
+
+            if cache.get(cooldown_key):
+                messages.info(request,"OTP already sent recently.")
+                return redirect("forgot_password")
+
+            otp = generate_otp()
+            store_otp(email,otp)
+
+            send_reset_otp(email,otp)
+
+            cache.set(cooldown_key,True,timeout=settings.OTP_RESEND_COOLDOWN)
+
+            request.session["reset_email"]=email
+
+        messages.success(request,
+                         "If an account exists, an OTP has been sent.")
         return redirect("verify_reset_otp")
     return render(request,"forgot_password.html")
 
@@ -180,28 +193,30 @@ def forgot_password(request):
 
 #verify reset otp
 def verify_reset_otp(request):
+    email = request.session.get("reset_email")
+    if not email:
+        return redirect("forgot_password")
     if request.method=="POST":
-        otp_input=request.POST.get("otp")
-        new_password=request.POST.get("password")
-        email=request.session.get("reset_email")
+        otp_input = request.POST.get("otp")
+        new_password = request.POST.get("password")
 
-        otp_obj=get_object_or_404(
-            PasswordResetOTP,
-            email=email,
-            otp=otp_input
-        )
-        if otp_obj.is_expired():
-            otp_obj.delete()
-            return render(request,"reset_password.html",{
-                "error":"OTP expired"
-            })
-        user=User.objects.get(email=email)
+        result = verify_otp(email,otp_input)
+
+        if result == "expired":
+            return render(request,"reset_password.html",{"error":"OTP expired"})
+        if result == "locked":
+            return render(request,"reset_password.html",{"error":"Too many attempts. Try again later."})
+        if result == "invalid":
+            return render(request,"reset_password.html",{"error":"Invalid OTP"})
+
+        user = User.objects.get(email=email)
         user.password=make_password(new_password)
-        user.save()
+        user.save(update_fields=["password"])
 
-        otp_obj.delete()
         del request.session["reset_email"]
+
         return redirect("login")
+
     return render(request,"reset_password.html")
 
 

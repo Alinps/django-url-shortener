@@ -35,6 +35,9 @@ LOGIN_RATE_LIMIT=int(os.environ.get('LOGIN_RATE_LIMIT',5))
 LOGIN_RATE_WINDOW=int(os.environ.get('LOGIN_RATE_WINDOW',60))
 REGISTER_RATE_LIMIT=int(os.environ.get('REGISTER_RATE_LIMIT',3))
 REGISTER_RATE_WINDOW=int(os.environ.get('REGISTER_RATE_WINDOW',60))
+OTP_EXPIRY_SECONDS=int(os.environ.get('OTP_EXPIRY_SECONDS',300))
+OTP_MAX_ATTEMPTS=int(os.environ.get('OTP_MAX_ATTEMPTS',5))
+OTP_RESEND_COOLDOWN=int(os.environ.get('OTP_RESENT_COOLDOWN',60))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

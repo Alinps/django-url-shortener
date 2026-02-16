@@ -9,13 +9,7 @@ from app.utils.base62 import encode_base62
 
 
 
-class PasswordResetOTP(models.Model):
-    email=models.EmailField()
-    otp=models.CharField(max_length=6)
-    created_at=models.DateTimeField(auto_now_add=True)
 
-    def is_expired(self):
-        return (timezone.now()-self.created_at).seconds>300
 
 
 

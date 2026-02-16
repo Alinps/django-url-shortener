@@ -16,7 +16,8 @@ def check_login_rate_limit(ip,email):
     elif ip_count >= settings.LOGIN_RATE_LIMIT:
         return False
     else:
-        cache.incr(ip_key)
+        counterip=cache.incr(ip_key)
+        print("login counter ip: ",counterip)
 
     # Email check
 
@@ -25,6 +26,7 @@ def check_login_rate_limit(ip,email):
     elif email_count >= settings.LOGIN_RATE_LIMIT:
         return False
     else:
-        cache.incr(email_key)
+        counteremail=cache.incr(email_key)
+        print("login counter email: ",counteremail)
 
     return True
