@@ -1,19 +1,18 @@
 from datetime import timedelta
-
 from django.conf import settings
-from django.utils import timezone
+
 from datetime import datetime
 from django.db.models.functions import TruncDate
 from django.contrib import messages
-from django.core.paginator import Paginator
+
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
-from django.http import JsonResponse
+
 import json
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login,logout
+
 from django.utils import timezone
-from .forms import SignUp,login_form
+
 from .tasks import record_click_event
 from .utils.id_generator import get_next_short_id
 from .utils.rate_limit import check_rate_limit, check_create_rate_limit
@@ -22,16 +21,12 @@ from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ClickEvent,ShortURLCore, ShortURLMeta
 from django.db.models import F, Count
 from django.views.decorators.csrf import csrf_protect
-from django.db.models import Sum
-from django.contrib.auth.models import User
-from .utils.mail_sender import send_reset_otp
+
+
 from .utils.detect_device import detect_device_type
-from .utils.otp_generate import generate_otp
-from .models import PasswordResetOTP
-from django.contrib.auth.hashers import make_password
-from django.views.decorators.cache import never_cache
+
 from django.db import DataError, IntegrityError, transaction
-import traceback
+
 from .utils.base62 import encode_base62,obfuscate_id
 from django.core.cache import cache
 from django.db.models import Q, Sum
@@ -39,60 +34,18 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.views.decorators.cache import never_cache
-from accounts.utils.verification_email import send_verification_email
 
 
 # Create your views here.
 
 
-def auth_choice(request):
-    return render(request,'auth_choice.html')
+
 
 
 def landingpage(request):
     return render(request,'landingpage.html')
 
 
-def register(request):
-    if request.method=='POST':
-        form=SignUp(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-
-            send_verification_email(request,user)
-
-            return render(request, "verify_email_sent.html")
-    else:
-        form=SignUp()
-    return render(request,'signup.html',{'form':form})
-
-def login_user(request):
-    if request.method=='POST':
-        form=login_form(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            if not user.is_active:
-                messages.warning(request,
-                                 "Your account is not activated. Please verify your email.")
-                return redirect("resend_activation")
-            login(request,user)
-            return redirect('home')
-    else:
-        form=login_form()
-    return render(request,'login.html',{'form':form})
-
-
-
-@never_cache
-@login_required(login_url='/login/')
-@csrf_protect
-def logout_user(request):
-    if request.method=='POST':
-        logout(request)
-        return redirect('login')
-    return render(request,'logout.html')
 
 
 
@@ -506,52 +459,13 @@ def aboutus(request):
     return render(request,'about.html')
 
 
-def forgot_password(request):
-    if request.method=="POST":
-        email=request.POST.get("email")
-        if not User.objects.filter(email=email).exists():
-            return render(request,"forgot_password.html",{
-                "error":"No account found with this email"
-            })
-        otp=generate_otp()
-        PasswordResetOTP.objects.create(
-            email=email,
-            otp=otp
-        )
-        send_reset_otp(email,otp)
-        request.session["reset_email"]=email
-        return redirect("verify_reset_otp")
-    return render(request,"forgot_password.html")
 
 
 
 
 
-#verify reset otp
-def verify_reset_otp(request):
-    if request.method=="POST":
-        otp_input=request.POST.get("otp")
-        new_password=request.POST.get("password")
-        email=request.session.get("reset_email")
 
-        otp_obj=get_object_or_404(
-            PasswordResetOTP,
-            email=email,
-            otp=otp_input
-        )
-        if otp_obj.is_expired():
-            otp_obj.delete()
-            return render(request,"reset_password.html",{
-                "error":"OTP expired"
-            })
-        user=User.objects.get(email=email)
-        user.password=make_password(new_password)
-        user.save()
 
-        otp_obj.delete()
-        del request.session["reset_email"]
-        return redirect("login")
-    return render(request,"reset_password.html")
 
 
 

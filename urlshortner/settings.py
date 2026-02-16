@@ -31,6 +31,10 @@ REDIRECT_RATE_WINDOW=int(os.environ.get('REDIRECT_RATE_WINDOW',60))
 CREATE_RATE_LIMIT=int(os.environ.get('CREATE_RATE_LIMIT',20))
 CREATE_RATE_WINDOW=int(os.environ.get('CREATE_RATE_WINDOW',60))
 CREATE_DAILY_LIMIT=int(os.environ.get('CREATE_DAILY_LIMIT',500))
+LOGIN_RATE_LIMIT=int(os.environ.get('LOGIN_RATE_LIMIT',5))
+LOGIN_RATE_WINDOW=int(os.environ.get('LOGIN_RATE_WINDOW',60))
+REGISTER_RATE_LIMIT=int(os.environ.get('REGISTER_RATE_LIMIT',3))
+REGISTER_RATE_WINDOW=int(os.environ.get('REGISTER_RATE_WINDOW',60))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -70,7 +74,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'urlshortner.urls'
-LOGIN_URL = '/login/'
+LOGIN_URL = '/account/login/'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 PASSWORD_RESET_TIMEOUT = 86400  # 24 hours
 
