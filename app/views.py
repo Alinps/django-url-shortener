@@ -1,32 +1,23 @@
 from datetime import timedelta
 from django.conf import settings
-
 from datetime import datetime
 from django.db.models.functions import TruncDate
 from django.contrib import messages
-
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render,redirect
-
 import json
 from django.contrib.auth.decorators import login_required
-
 from django.utils import timezone
-
-from .tasks import record_click_event
+from .tasks import enqueue_click
 from .utils.id_generator import get_next_short_id
 from .utils.rate_limit import check_rate_limit, check_create_rate_limit
 from .utils.rate_limit_response import rate_limited_response
 from .utils.shortcode_validator import  is_valid_custom_code
 from .models import ClickEvent,ShortURLCore, ShortURLMeta
-from django.db.models import F, Count
+from django.db.models import  Count
 from django.views.decorators.csrf import csrf_protect
-
-
 from .utils.detect_device import detect_device_type
-
 from django.db import DataError, IntegrityError, transaction
-
 from .utils.base62 import encode_base62,obfuscate_id
 from django.core.cache import cache
 from django.db.models import Q, Sum
@@ -351,6 +342,9 @@ def delete_url(request,id):
 
 
 
+
+
+
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
 
@@ -373,10 +367,16 @@ def redirect_url(request,short_code):
 
     if cached:
         if not cached["is_active"]:
-            raise Http404("This URL is disables")
+            raise Http404("This URL is disabled")
 
         # Enqueue analytics (NON-BLOCKING)
-        record_click_event.delay(
+        # record_click_event.delay(
+        #     cached["id"],
+        #     request.META.get("HTTP_USER_AGENT",""),
+        #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+        # )
+
+        enqueue_click.delay(
             cached["id"],
             request.META.get("HTTP_USER_AGENT",""),
             detect_device_type(request.META.get("HTTP_USER_AGENT",""))
@@ -401,10 +401,10 @@ def redirect_url(request,short_code):
         CACHE_TTL
     )
 
-    record_click_event.delay(
+    enqueue_click.delay(
         url.id,
-        request.META.get("HTTP_USER_AGENT",""),
-        detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+        request.META.get("HTTP_USER_AGENT", ""),
+        detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
     )
 
     return redirect(url.original_url)

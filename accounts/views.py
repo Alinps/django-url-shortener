@@ -8,7 +8,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from accounts.forms import SignUp, login_form
-
 from accounts.utils.mail_sender import send_reset_otp
 from accounts.utils.otp_generate import generate_otp
 from app.utils.rate_limit_response import rate_limited_response
