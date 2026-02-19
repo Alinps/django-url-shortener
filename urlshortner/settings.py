@@ -38,6 +38,8 @@ REGISTER_RATE_WINDOW=int(os.environ.get('REGISTER_RATE_WINDOW',60))
 OTP_EXPIRY_SECONDS=int(os.environ.get('OTP_EXPIRY_SECONDS',300))
 OTP_MAX_ATTEMPTS=int(os.environ.get('OTP_MAX_ATTEMPTS',5))
 OTP_RESEND_COOLDOWN=int(os.environ.get('OTP_RESENT_COOLDOWN',60))
+GLOBAL_RATE_LIMIT=int(os.environ.get('GLOBAL_RATE_LIMIT',300))
+GLOBAL_RATE_WINDOW=int(os.environ.get('GLOBAL_RATE_WINDOW',60))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -69,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'urlshortner.middleware.global_rate_limit.GlobalRateLimitMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     "allauth.account.middleware.AccountMiddleware",

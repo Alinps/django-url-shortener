@@ -388,7 +388,7 @@ def redirect_url(request,short_code):
     url = get_object_or_404(
         ShortURLCore.objects.only("id","original_url","is_active"), # New table
         short_code=short_code,
-        is_active=True
+        # is_active=True
     )
 
     cache.set(
@@ -406,7 +406,9 @@ def redirect_url(request,short_code):
         request.META.get("HTTP_USER_AGENT", ""),
         detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
     )
-
+    print("from db")
+    if not url.is_active:
+        raise Http404("This URL is disabled")
     return redirect(url.original_url)
 
 
