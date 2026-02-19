@@ -2,6 +2,10 @@ from celery import shared_task
 from django.db.models import F
 from django_redis import get_redis_connection
 from .models import  ClickEvent, ShortURLMeta
+from .metrics import (flush_duration_seconds,
+                      flush_lock_failed_total,
+                      flush_click_count_total,
+                      flush_event_count_total)
 
 
 
@@ -33,6 +37,7 @@ def handle_click_count(redis_conn, key):
         ).update(
             click_count=F("click_count") + count
         )
+        flush_click_count_total.inc(count)
 
     redis_conn.delete(key)
 
@@ -62,6 +67,7 @@ def handle_click_events(redis_conn, key):
 
     if click_objects:
         ClickEvent.objects.bulk_create(click_objects)
+        flush_event_count_total.inc(len(click_objects))
 
     redis_conn.delete(key)
 
@@ -77,27 +83,28 @@ def flush_analytics():
     lock_acquired = redis_conn.set(lock_key, "1", nx=True, ex=60)
 
     if not lock_acquired:
+        flush_lock_failed_total.inc()
         print("Flush already running.")
         return
+    with flush_duration_seconds.time():
+        try:
+            # First handle orphan processing keys
+            for key in redis_conn.scan_iter("processing:click_count:*"):
+                handle_click_count(redis_conn, key)
 
-    try:
-        # First handle orphan processing keys
-        for key in redis_conn.scan_iter("processing:click_count:*"):
-            handle_click_count(redis_conn, key)
+            for key in redis_conn.scan_iter("processing:click_events:*"):
+                handle_click_events(redis_conn, key)
 
-        for key in redis_conn.scan_iter("processing:click_events:*"):
-            handle_click_events(redis_conn, key)
+            # Then handle fresh keys
+            for key in redis_conn.scan_iter("click_count:*"):
+                processing_key = f"processing:{key.decode()}"
+                redis_conn.rename(key, processing_key)
+                handle_click_count(redis_conn, processing_key)
 
-        # Then handle fresh keys
-        for key in redis_conn.scan_iter("click_count:*"):
-            processing_key = f"processing:{key.decode()}"
-            redis_conn.rename(key, processing_key)
-            handle_click_count(redis_conn, processing_key)
+            for key in redis_conn.scan_iter("click_events:*"):
+                processing_key = f"processing:{key.decode()}"
+                redis_conn.rename(key, processing_key)
+                handle_click_events(redis_conn, processing_key)
 
-        for key in redis_conn.scan_iter("click_events:*"):
-            processing_key = f"processing:{key.decode()}"
-            redis_conn.rename(key, processing_key)
-            handle_click_events(redis_conn, processing_key)
-
-    finally:
-        redis_conn.delete(lock_key)
+        finally:
+            redis_conn.delete(lock_key)

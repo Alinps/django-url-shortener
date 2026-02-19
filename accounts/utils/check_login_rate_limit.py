@@ -1,5 +1,7 @@
 from django.core.cache import cache
 from django.conf import settings
+from app.metrics import rate_limit_trigger_total
+
 
 
 def check_login_rate_limit(ip,email):
@@ -14,6 +16,7 @@ def check_login_rate_limit(ip,email):
     if ip_count  is None:
         cache.set(ip_key,1,timeout=settings.LOGIN_RATE_WINDOW)
     elif ip_count >= settings.LOGIN_RATE_LIMIT:
+        rate_limit_trigger_total.inc()
         return False
     else:
         counterip=cache.incr(ip_key)

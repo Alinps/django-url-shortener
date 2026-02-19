@@ -25,7 +25,10 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.views.decorators.cache import never_cache
-
+from .metrics  import (redirect_request_total,
+                       cache_hit_total,
+                       cache_miss_total,
+                       click_enqueued_total)
 
 # Create your views here.
 
@@ -347,6 +350,7 @@ def delete_url(request,id):
 
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
+    redirect_request_total.inc()
 
     x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded:
@@ -366,6 +370,7 @@ def redirect_url(request,short_code):
     cached = cache.get(cache_key)
 
     if cached:
+        cache_hit_total.inc()
         if not cached["is_active"]:
             raise Http404("This URL is disabled")
 
@@ -375,7 +380,7 @@ def redirect_url(request,short_code):
         #     request.META.get("HTTP_USER_AGENT",""),
         #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
         # )
-
+        click_enqueued_total.inc()
         enqueue_click.delay(
             cached["id"],
             request.META.get("HTTP_USER_AGENT",""),
@@ -385,6 +390,7 @@ def redirect_url(request,short_code):
         return redirect(cached["original_url"])
 
     #STEP 2: Cache miss -> DB
+    cache_miss_total.inc()
     url = get_object_or_404(
         ShortURLCore.objects.only("id","original_url","is_active"), # New table
         short_code=short_code,
@@ -400,7 +406,7 @@ def redirect_url(request,short_code):
         },
         CACHE_TTL
     )
-
+    click_enqueued_total.inc()
     enqueue_click.delay(
         url.id,
         request.META.get("HTTP_USER_AGENT", ""),

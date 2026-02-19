@@ -1,6 +1,8 @@
 from django.utils import timezone
 from django.conf import settings
 from django.core.cache import cache
+from app.metrics import rate_limit_trigger_total
+
 
 def check_rate_limit(ip):
 
@@ -14,6 +16,7 @@ def check_rate_limit(ip):
         return True
 
     if current >= settings.REDIRECT_RATE_LIMIT:
+        rate_limit_trigger_total.inc()
         return False
 
     print("Rate limit triggered for IP:",ip)
@@ -32,6 +35,7 @@ def check_create_rate_limit(ip,user_id):
     if ip_count is None:
         cache.set(ip_key,1,timeout=settings.CREATE_RATE_WINDOW)
     elif ip_count >= settings.CREATE_RATE_LIMIT:
+        rate_limit_trigger_total.inc()
         return False
     else:
         cache.incr(ip_key)

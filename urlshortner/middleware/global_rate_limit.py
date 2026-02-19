@@ -1,6 +1,7 @@
 from django.conf import settings
 from django_redis import get_redis_connection
 from app.utils.rate_limit_response import rate_limited_response
+from app.metrics import rate_limit_trigger_total
 
 
 class GlobalRateLimitMiddleware:
@@ -22,9 +23,10 @@ class GlobalRateLimitMiddleware:
 
         # Always refresh expiry to avoid orphan keys
         if current == 1:
-            self.redis.expire(key, 60)
+            self.redis.expire(key, self.window)
 
         if current > self.limit:
+            rate_limit_trigger_total.inc()
             return rate_limited_response(
                 request,
                 self.window
