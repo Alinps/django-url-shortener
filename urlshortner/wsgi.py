@@ -10,7 +10,11 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-
+from prometheus_client import multiprocess,CollectorRegistry
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'urlshortner.settings')
 
 application = get_wsgi_application()
+
+if "PROMETHEUS_MULTIPROC_DIR" in os.environ:
+    registry = CollectorRegistry()
+    multiprocess.MultiProcessCollector(registry)

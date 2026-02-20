@@ -1,3 +1,5 @@
+import uuid
+
 from celery import shared_task
 from django.db.models import F
 from django_redis import get_redis_connection
@@ -20,6 +22,7 @@ def enqueue_click(short_url_id, user_agent, device_type):
         f"click_events:{short_url_id}",
         f"{user_agent}|{device_type}"
     )
+    print("enqueued click")
 
 
 def handle_click_count(redis_conn, key):
@@ -80,7 +83,11 @@ def flush_analytics():
 
     lock_key = "analytics_flush_lock"
 
-    lock_acquired = redis_conn.set(lock_key, "1", nx=True, ex=60)
+    lock_value = str(uuid.uuid4())
+
+    lock_acquired = redis_conn.set(lock_key, lock_value, nx=True, ex=60)
+
+
 
     if not lock_acquired:
         flush_lock_failed_total.inc()
@@ -105,6 +112,7 @@ def flush_analytics():
                 processing_key = f"processing:{key.decode()}"
                 redis_conn.rename(key, processing_key)
                 handle_click_events(redis_conn, processing_key)
-
+            print("flush worked")
         finally:
-            redis_conn.delete(lock_key)
+            if redis_conn.get(lock_key) == lock_value.encode():
+                redis_conn.delete(lock_key)

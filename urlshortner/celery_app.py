@@ -1,5 +1,10 @@
 import os
 from celery import Celery
+from dotenv import load_dotenv
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 # Tell celery where Django settings live
 os.environ.setdefault("DJANGO_SETTINGS_MODULE","urlshortner.settings")
