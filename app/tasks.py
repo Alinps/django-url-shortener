@@ -7,7 +7,9 @@ from .models import  ClickEvent, ShortURLMeta
 from .metrics import (flush_duration_seconds,
                       flush_lock_failed_total,
                       flush_click_count_total,
-                      flush_event_count_total)
+                      flush_event_count_total,
+                      redis_click_count_backlog,
+                      redis_click_event_backlog)
 
 
 
@@ -95,6 +97,7 @@ def flush_analytics():
         return
     with flush_duration_seconds.time():
         try:
+
             # First handle orphan processing keys
             for key in redis_conn.scan_iter("processing:click_count:*"):
                 handle_click_count(redis_conn, key)
@@ -116,3 +119,19 @@ def flush_analytics():
         finally:
             if redis_conn.get(lock_key) == lock_value.encode():
                 redis_conn.delete(lock_key)
+
+
+
+
+@shared_task
+def measure_backlog():
+    redis_conn = get_redis_connection("default")
+
+    click_count_keys = list(redis_conn.scan_iter("click_count:*"))
+    total_events = 0
+    for key in redis_conn.scan_iter("click_events:*"):
+        total_events += redis_conn.llen(key)
+
+    redis_click_count_backlog.set(len(click_count_keys))
+    redis_click_event_backlog.set(total_events)
+    print("metrics measured backlog")

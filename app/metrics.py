@@ -1,4 +1,4 @@
-from prometheus_client import Counter, Histogram
+from prometheus_client import Counter, Histogram, Gauge
 
 #----------------------
 # Redirect Layer
@@ -59,4 +59,16 @@ flush_click_count_total = Counter(
 flush_event_count_total = Counter(
     "flush_event_count_total",
     "Total click events flushed to DB"
+)
+
+redis_click_count_backlog = Gauge(
+    "redis_click_count_backlog",
+    "Number of click_count keys waiting in Redis",
+    multiprocess_mode="livesum"  # It ignores dead process files, Sum gauge values across active processes, Remove pid label from output
+)
+
+redis_click_event_backlog = Gauge(
+    "redis_click_event_backlog",
+    "Number of click_event keys waiting in Redis",
+    multiprocess_mode="livesum"
 )

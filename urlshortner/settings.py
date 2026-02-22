@@ -217,6 +217,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "app.tasks.flush_analytics",
         "schedule": 30.0,
     },
+    "measure-backlog-every-10-seconds":{
+        "task":"app.tasks.measure_backlog",
+        "schedule":10.0,
+    }
 }
 
 
