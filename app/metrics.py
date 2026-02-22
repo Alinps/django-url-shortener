@@ -72,3 +72,21 @@ redis_click_event_backlog = Gauge(
     "Number of click_event keys waiting in Redis",
     multiprocess_mode="livesum"
 )
+
+redirect_latency_seconds = Histogram(
+    "redirect_latency_seconds",
+    "Time taken to sever redirect request",
+    buckets=(
+        0.005,   # 5ms
+        0.01,    # 10ms
+        0.025,   # 50ms
+        0.05,    # 50ms
+        0.075,   # 75ms
+        0.1,     # 100ms
+        0.25,    # 250ms
+        0.5,     # 500ms
+        0.75,    # 750ms
+        1.0,     # 1 s
+        2.5      # 2 s#1000ms
+    )
+)

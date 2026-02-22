@@ -25,10 +25,11 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.views.decorators.cache import never_cache
-from .metrics  import (redirect_request_total,
-                       cache_hit_total,
-                       cache_miss_total,
-                       click_enqueued_total)
+from .metrics import (redirect_request_total,
+                      cache_hit_total,
+                      cache_miss_total,
+                      click_enqueued_total, redirect_latency_seconds)
+import time
 
 # Create your views here.
 
@@ -350,72 +351,78 @@ def delete_url(request,id):
 
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
-    redirect_request_total.inc()
+    start_time = time.time()
+    try:
+        redirect_request_total.inc()
 
-    x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
-    if x_forwarded:
-        ip = x_forwarded.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR")
+        x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded:
+            ip = x_forwarded.split(",")[0]
+        else:
+            ip = request.META.get("REMOTE_ADDR")
 
-    if not check_rate_limit(ip):
-        return rate_limited_response(
-            request,
-            settings.REDIRECT_RATE_WINDOW
+        if not check_rate_limit(ip):
+            return rate_limited_response(
+                request,
+                settings.REDIRECT_RATE_WINDOW
+            )
+
+        cache_key=f"short_url:{short_code}"
+
+        #STEP 1: Try cache
+        cached = cache.get(cache_key)
+
+        if cached:
+            cache_hit_total.inc()
+            if not cached["is_active"]:
+                raise Http404("This URL is disabled")
+
+            # Enqueue analytics (NON-BLOCKING)
+            # record_click_event.delay(
+            #     cached["id"],
+            #     request.META.get("HTTP_USER_AGENT",""),
+            #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+            # )
+            click_enqueued_total.inc()
+            enqueue_click.delay(
+                cached["id"],
+                request.META.get("HTTP_USER_AGENT",""),
+                detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+            )
+            print("CACHE HIT")
+
+            return redirect(cached["original_url"])
+
+        #STEP 2: Cache miss -> DB
+        cache_miss_total.inc()
+        url = get_object_or_404(
+            ShortURLCore.objects.only("id","original_url","is_active"), # New table
+            short_code=short_code,
+            # is_active=True
         )
 
-    cache_key=f"short_url:{short_code}"
-
-    #STEP 1: Try cache
-    cached = cache.get(cache_key)
-
-    if cached:
-        cache_hit_total.inc()
-        if not cached["is_active"]:
-            raise Http404("This URL is disabled")
-
-        # Enqueue analytics (NON-BLOCKING)
-        # record_click_event.delay(
-        #     cached["id"],
-        #     request.META.get("HTTP_USER_AGENT",""),
-        #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
-        # )
+        cache.set(
+            cache_key,
+            {
+                "id":url.id,
+                "original_url":url.original_url,
+                "is_active":url.is_active,
+            },
+            CACHE_TTL
+        )
         click_enqueued_total.inc()
         enqueue_click.delay(
-            cached["id"],
-            request.META.get("HTTP_USER_AGENT",""),
-            detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+            url.id,
+            request.META.get("HTTP_USER_AGENT", ""),
+            detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
         )
-        print("CACHE HIT")
-        return redirect(cached["original_url"])
-
-    #STEP 2: Cache miss -> DB
-    cache_miss_total.inc()
-    url = get_object_or_404(
-        ShortURLCore.objects.only("id","original_url","is_active"), # New table
-        short_code=short_code,
-        # is_active=True
-    )
-
-    cache.set(
-        cache_key,
-        {
-            "id":url.id,
-            "original_url":url.original_url,
-            "is_active":url.is_active,
-        },
-        CACHE_TTL
-    )
-    click_enqueued_total.inc()
-    enqueue_click.delay(
-        url.id,
-        request.META.get("HTTP_USER_AGENT", ""),
-        detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
-    )
-    print("from db")
-    if not url.is_active:
-        raise Http404("This URL is disabled")
-    return redirect(url.original_url)
+        print("from db")
+        if not url.is_active:
+            raise Http404("This URL is disabled")
+        return redirect(url.original_url)
+    finally:
+        duration = time.time()-start_time
+        redirect_latency_seconds.observe(duration)
 
 
 

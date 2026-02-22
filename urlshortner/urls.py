@@ -27,7 +27,7 @@ def metrics_view(request):
     return HttpResponse(data, content_type=CONTENT_TYPE_LATEST)
 
 urlpatterns = [
-    path("metrics/", metrics_view,),
+    path("metrics", metrics_view,),
     path('admin/', admin.site.urls),
     path('',include('app.urls')),
     path('accounts/',include('allauth.urls')),
