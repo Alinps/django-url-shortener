@@ -13,12 +13,15 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import json
+import logging
+from .logging_config import JSONFormatter
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
-
+LOG_DIR = os.path.join(BASE_DIR, "logs")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -69,6 +72,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "urlshortner.middleware.request_id.RequestIDMiddleware",
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -245,3 +249,33 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    "version":1,
+    "disable_existing_loggers":False,
+    "formatters":{
+        "json":{
+            "()": JSONFormatter,
+        },
+    },
+    "handlers":{
+        "console":{
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+        "file":{
+            "class":"logging.handlers.RotatingFileHandler",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+            "filename":os.path.join(LOG_DIR,"app.log"),
+            "formatter":"json",
+        }
+    },
+    "loggers":{
+        "":{
+            "handlers":["console","file"],
+            "level":"INFO",
+            "propagate":False
+        }
+    }
+}

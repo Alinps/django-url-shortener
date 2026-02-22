@@ -26,6 +26,8 @@ from datetime import timedelta
 from django.conf import settings
 from django.core.cache import cache
 from redis.exceptions import RedisError
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -54,8 +56,14 @@ def register(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
+            logger.info("user_registration_attempt", extra={
+                "request_id": request.request_id,
+            })
 
             send_verification_email(request, user)
+            logger.info("user_activation_email_send_successfully", extra={
+                "request_id": request.request_id,
+            })
 
             return render(request, "verify_email_sent.html")
     else:
@@ -89,10 +97,18 @@ def login_user(request):
         if form.is_valid():
             user = form.get_user()
             if not user.is_active:
+                logger.warning("user_account_is_inactive", extra={
+                    "request_id": request.request_id,
+                    "user_email": email
+                })
                 messages.warning(request,
                                  "Your account is not activated. Please verify your email.")
                 return redirect("resend_activation")
             login(request,user)
+            logger.info("user_login_attempt", extra={
+                "request_id": request.request_id,
+                "user_email": email
+            })
             return redirect('home')
     else:
         form=login_form()
@@ -105,6 +121,9 @@ def login_user(request):
 def activate_account(request, uidb64, token):
     User = get_user_model()
     user = None
+    logger.info("user_initiated_activate_account", extra={
+        "request_id": request.request_id,
+    })
 
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -134,6 +153,9 @@ COOLDOWN_SECONDS = 300  # or use settings value
 
 
 def resend_activation(request):
+    logger.info("user_requested_resend_activation_link", extra={
+        "request_id": request.request_id,
+    })
 
     if request.method == "POST":
         email = request.POST.get("email")
@@ -205,6 +227,10 @@ def resend_activation(request):
 def forgot_password(request):
     if request.method=="POST":
         email=request.POST.get("email")
+        logger.info("user_forgot_password_attempt", extra={
+            "request_id": request.request_id,
+            "user_email": email
+        })
 
         # Always respond same (prevent enumeration)
         user = User.objects.filter(email=email).first()
@@ -261,10 +287,22 @@ def verify_reset_otp(request):
         result = verify_otp(user, otp_input)
 
         if result == "expired":
+            logger.warning("forgot_password_otp_expired", extra={
+                "request_id": request.request_id,
+                "user_email": email
+            })
             return render(request,"reset_password.html",{"error":"OTP expired"})
         if result == "locked":
+            logger.warning("reached_max_otp_validation", extra={
+                "request_id": request.request_id,
+                "user_email": email
+            })
             return render(request,"reset_password.html",{"error":"Too many attempts. Try again later."})
         if result == "invalid":
+            logger.info("forgot_password_otp_invalid_attempt", extra={
+                "request_id": request.request_id,
+                "user_email": email
+            })
             return render(request,"reset_password.html",{"error":"Invalid OTP"})
 
         # user = User.objects.get(email=email)
@@ -276,9 +314,14 @@ def verify_reset_otp(request):
         # return redirect("login")
 
         if result == "valid":
+
             user.password = make_password(new_password)
             user.save(update_fields=["password"])
             del request.session["reset_email"]
+            logger.info("forgot_password_attempt_success", extra={
+                "request_id": request.request_id,
+                "user_email": email
+            })
             return redirect("login")
 
     return render(request,"reset_password.html")
@@ -296,5 +339,8 @@ def verify_reset_otp(request):
 def logout_user(request):
     if request.method=='POST':
         logout(request)
+        logger.info("user_attempt_logout", extra={
+            "request_id": request.request_id,
+        })
         return redirect('login')
     return render(request,'logout.html')
