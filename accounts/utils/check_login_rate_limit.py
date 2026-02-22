@@ -1,5 +1,7 @@
 from django.core.cache import cache
 from django.conf import settings
+from redis import RedisError
+
 from app.metrics import rate_limit_trigger_total
 
 
@@ -9,8 +11,11 @@ def check_login_rate_limit(ip,email):
     ip_key = f"login_ip:{ip}"
     email_key = f"login_email:{email}"
 
-    ip_count = cache.get(ip_key)
-    email_count =cache.get(email_key)
+    try:
+        ip_count = cache.get(ip_key)
+        email_count =cache.get(email_key)
+    except RedisError:
+        return True
 
     #IP check
     if ip_count  is None:

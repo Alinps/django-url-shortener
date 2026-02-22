@@ -24,13 +24,14 @@ from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-from django.views.decorators.cache import never_cache
+
 from .metrics import (redirect_request_total,
                       cache_hit_total,
                       cache_miss_total,
                       click_enqueued_total, redirect_latency_seconds)
 import time
-
+from django.views.decorators.cache import never_cache
+from redis.exceptions import RedisError
 # Create your views here.
 
 
@@ -46,31 +47,72 @@ def landingpage(request):
 
 
 
+#
+
+
+
+
+
 @never_cache
 @login_required
 @csrf_protect
 def home_page(request):
+
     if request.method == "POST":
 
+        # --------------------------
+        # Get Client IP
+        # --------------------------
         x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded:
             ip = x_forwarded.split(",")[0]
         else:
             ip = request.META.get("REMOTE_ADDR")
 
-        if not check_create_rate_limit(ip,request.user.id):
+        # --------------------------
+        # 1️⃣ Redis Burst Protection (Fail-Open)
+        # --------------------------
+        try:
+            if not check_create_rate_limit(ip, request.user.id):
+                return rate_limited_response(
+                    request,
+                    settings.CREATE_RATE_WINDOW
+                )
+        except RedisError:
+            # Redis down → allow request (fail-open)
+            pass
+
+        # --------------------------
+        # 2️⃣ DB Hard Daily Quota (Authoritative)
+        # --------------------------
+        today = timezone.now().date()
+
+        daily_count = ShortURLMeta.objects.filter(
+            user=request.user,
+            created_at__date=today
+        ).count()
+
+        if daily_count >= settings.CREATE_DAILY_LIMIT:
             return rate_limited_response(
                 request,
                 settings.CREATE_RATE_WINDOW
             )
 
+        # --------------------------
+        # Extract Inputs
+        # --------------------------
         original_url = request.POST.get("original_url")
-        title =  request.POST.get("title")
+        title = request.POST.get("title")
         custom_code = request.POST.get("custom_code")
 
         try:
             with transaction.atomic():
+
+                # --------------------------
+                # Shortcode Generation
+                # --------------------------
                 if custom_code:
+
                     if not is_valid_custom_code(custom_code):
                         messages.error(request, "Invalid short URL format")
                         return redirect("home")
@@ -82,15 +124,23 @@ def home_page(request):
                     )
 
                 else:
-                    counter = get_next_short_id()
-                    obfuscate = obfuscate_id(counter)
-                    short_code = encode_base62(obfuscate)
-
+                    # Recommended: Use DB auto-increment ID
                     core = ShortURLCore.objects.create(
-                        short_code=short_code,
+                        short_code="temp",  # placeholder
                         original_url=original_url,
                         is_active=True
                     )
+
+                    # Generate based on DB id
+                    obfuscated = obfuscate_id(core.id)
+                    short_code = encode_base62(obfuscated)
+
+                    core.short_code = short_code
+                    core.save(update_fields=["short_code"])
+
+                # --------------------------
+                # Meta Record
+                # --------------------------
                 ShortURLMeta.objects.create(
                     short_url=core,
                     user=request.user,
@@ -98,15 +148,18 @@ def home_page(request):
                     click_count=0
                 )
 
-            messages.success(request,"URL shortened successfully")
+            messages.success(request, "URL shortened successfully")
             return redirect("list")
+
         except IntegrityError:
             messages.error(request, "Short URL already exists")
             return redirect("home")
+
         except DataError:
-            messages.error(request,"Invalid URL format or URL is too long")
+            messages.error(request, "Invalid URL format or URL is too long")
             return redirect("home")
-    return render(request,"home.html")
+
+    return render(request, "home.html")
 
 
 
@@ -370,7 +423,10 @@ def redirect_url(request,short_code):
         cache_key=f"short_url:{short_code}"
 
         #STEP 1: Try cache
-        cached = cache.get(cache_key)
+        try:
+            cached = cache.get(cache_key)
+        except RedisError:
+            cached = None
 
         if cached:
             cache_hit_total.inc()
@@ -384,12 +440,15 @@ def redirect_url(request,short_code):
             #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
             # )
             click_enqueued_total.inc()
-            enqueue_click.delay(
-                cached["id"],
-                request.META.get("HTTP_USER_AGENT",""),
-                detect_device_type(request.META.get("HTTP_USER_AGENT",""))
-            )
-            print("CACHE HIT")
+            try:
+                enqueue_click.delay(
+                    cached["id"],
+                    request.META.get("HTTP_USER_AGENT",""),
+                    detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+                )
+                print("CACHE HIT")
+            except Exception:
+                pass
 
             return redirect(cached["original_url"])
 
@@ -400,22 +459,28 @@ def redirect_url(request,short_code):
             short_code=short_code,
             # is_active=True
         )
-
-        cache.set(
-            cache_key,
-            {
-                "id":url.id,
-                "original_url":url.original_url,
-                "is_active":url.is_active,
-            },
-            CACHE_TTL
-        )
+        try:
+            cache.set(
+                cache_key,
+                {
+                    "id":url.id,
+                    "original_url":url.original_url,
+                    "is_active":url.is_active,
+                },
+                CACHE_TTL
+            )
+        except RedisError:
+            pass
         click_enqueued_total.inc()
-        enqueue_click.delay(
-            url.id,
-            request.META.get("HTTP_USER_AGENT", ""),
-            detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
-        )
+
+        try:
+            enqueue_click.delay(
+                url.id,
+                request.META.get("HTTP_USER_AGENT", ""),
+                detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
+            )
+        except Exception:
+            pass
         print("from db")
         if not url.is_active:
             raise Http404("This URL is disabled")

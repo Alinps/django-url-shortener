@@ -7,6 +7,8 @@ from django.utils.encoding import force_str, DjangoUnicodeDecodeError
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
+from redis import RedisError
+
 from accounts.forms import SignUp, login_form
 from accounts.utils.mail_sender import send_reset_otp
 from accounts.utils.otp_generate import generate_otp
@@ -19,7 +21,11 @@ from .utils.check_register_rate_limit import check_register_rate_limit
 from .utils.otp_utils import store_otp,verify_otp
 from .utils.verification_email import send_verification_email
 
-
+from django.utils import timezone
+from datetime import timedelta
+from django.conf import settings
+from django.core.cache import cache
+from redis.exceptions import RedisError
 
 
 
@@ -122,33 +128,74 @@ def activate_account(request, uidb64, token):
 
 
 User = get_user_model()
+
+
+COOLDOWN_SECONDS = 300  # or use settings value
+
+
 def resend_activation(request):
 
     if request.method == "POST":
         email = request.POST.get("email")
-
         user = User.objects.filter(email=email).first()
 
-        # Always respond same way (security)
-
+        # Always respond same way (prevent enumeration)
         if user and not user.is_active:
 
             cache_key = f"resend_activation:{email}"
+            now = timezone.now()
+            cooldown_active = False
 
-            if cache.get(cache_key):
-                messages.info(request,"Activation email already sent recently.")
+            # -----------------------
+            # 1️⃣ Try Redis cooldown
+            # -----------------------
+            try:
+                cooldown_active = cache.get(cache_key)
+            except RedisError:
+                # Redis down → ignore and fallback to DB
+                cooldown_active = False
+
+            # -----------------------
+            # 2️⃣ DB fallback cooldown
+            # -----------------------
+            if not cooldown_active and user.last_activation_sent_at:
+                if now - user.last_activation_sent_at < timedelta(seconds=COOLDOWN_SECONDS):
+                    cooldown_active = True
+
+            if cooldown_active:
+                messages.info(
+                    request,
+                    "Activation email already sent recently."
+                )
                 return redirect("login")
 
-            send_verification_email(request,user)
+            # -----------------------
+            # Send activation email
+            # -----------------------
+            send_verification_email(request, user)
 
-            cache.set(cache_key,True,timeout=300)
+            # -----------------------
+            # Update Redis cooldown
+            # -----------------------
+            try:
+                cache.set(cache_key, True, timeout=COOLDOWN_SECONDS)
+            except RedisError:
+                # Redis down → skip silently
+                pass
 
-        messages.success(request,
-                         "If an inactive account exists, a new activation link has been sent.")
+            # -----------------------
+            # Update DB fallback
+            # -----------------------
+            user.last_activation_sent_at = now
+            user.save(update_fields=["last_activation_sent_at"])
+
+        messages.success(
+            request,
+            "If an inactive account exists, a new activation link has been sent."
+        )
         return redirect("login")
 
-    return render(request,"resend_activation.html")
-
+    return render(request, "resend_activation.html")
 
 
 
@@ -165,18 +212,28 @@ def forgot_password(request):
         if user:
             cooldown_key = f"reset_cooldown:{email}"
 
-            if cache.get(cooldown_key):
-                messages.info(request,"OTP already sent recently.")
-                return redirect("forgot_password")
+            try:
+                if cache.get(cooldown_key):
+                    messages.info(request, "OTP already sent recently.")
+                    return redirect("forgot_password")
+            except RedisError:
+                # Redis down → ignore cooldown
+                pass
 
-            otp = generate_otp()
-            store_otp(email,otp)
+            otp = generate_otp(user)  # <-- pass user
 
-            send_reset_otp(email,otp)
+            send_reset_otp(email, otp)
 
-            cache.set(cooldown_key,True,timeout=settings.OTP_RESEND_COOLDOWN)
+            try:
+                cache.set(
+                    cooldown_key,
+                    True,
+                    timeout=settings.OTP_RESEND_COOLDOWN
+                )
+            except RedisError:
+                pass
 
-            request.session["reset_email"]=email
+            request.session["reset_email"] = email
 
         messages.success(request,
                          "If an account exists, an OTP has been sent.")
@@ -199,7 +256,9 @@ def verify_reset_otp(request):
         otp_input = request.POST.get("otp")
         new_password = request.POST.get("password")
 
-        result = verify_otp(email,otp_input)
+        user = User.objects.get(email=email)
+
+        result = verify_otp(user, otp_input)
 
         if result == "expired":
             return render(request,"reset_password.html",{"error":"OTP expired"})
@@ -208,13 +267,19 @@ def verify_reset_otp(request):
         if result == "invalid":
             return render(request,"reset_password.html",{"error":"Invalid OTP"})
 
-        user = User.objects.get(email=email)
-        user.password=make_password(new_password)
-        user.save(update_fields=["password"])
+        # user = User.objects.get(email=email)
+        # user.password=make_password(new_password)
+        # user.save(update_fields=["password"])
+        #
+        # del request.session["reset_email"]
+        #
+        # return redirect("login")
 
-        del request.session["reset_email"]
-
-        return redirect("login")
+        if result == "valid":
+            user.password = make_password(new_password)
+            user.save(update_fields=["password"])
+            del request.session["reset_email"]
+            return redirect("login")
 
     return render(request,"reset_password.html")
 

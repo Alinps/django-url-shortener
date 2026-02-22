@@ -59,3 +59,26 @@ class ClickEvent(models.Model):
 
     def __str__(self):
         return f"Click on {self.short_url.short_code}at {self.timestamp}"
+
+
+
+#
+# class OTPVerification(models.Model):
+#     user = models.ForeignKey(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         related_name="otps"
+#     )
+#     code = models.CharField(max_length=6)
+#     expires_at = models.DateTimeField()
+#     attempts = models.IntegerField(default=0)
+#     is_used = models.BooleanField(default=False)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#
+#     class Meta:
+#         indexes = [
+#             models.Index(fields=["user", "code"]),
+#         ]
+#
+#     def is_expired(self):
+#         return timezone.now() > self.expires_at

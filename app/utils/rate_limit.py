@@ -2,13 +2,16 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.cache import cache
 from app.metrics import rate_limit_trigger_total
-
+from redis.exceptions import RedisError
 
 def check_rate_limit(ip):
 
     key = f"rate_limit:{ip}"
 
-    current = cache.get(key)
+    try:
+        current = cache.get(key)
+    except RedisError:
+        return True
 
     if current is None:
         # First request
@@ -24,13 +27,16 @@ def check_rate_limit(ip):
 
     current= cache.incr(key)
     print("current count: ",current)
-    return True
+    return True # fail open
 
 
 def check_create_rate_limit(ip,user_id):
 
     ip_key = f"create_rate_ip:{ip}"
-    ip_count = cache.get(ip_key)
+    try:
+        ip_count = cache.get(ip_key)
+    except RedisError:
+        return True # fail-open
 
     if ip_count is None:
         cache.set(ip_key,1,timeout=settings.CREATE_RATE_WINDOW)
