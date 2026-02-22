@@ -1,5 +1,8 @@
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*.sqlite3
 .env
-promethus_data/
+prometheus_data/
+*.log
+media/
+staticfiles/
