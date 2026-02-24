@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Activated | TheKME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Auto Redirect After 4 Seconds -->
+    <meta http-equiv="refresh" content="4;url={% url 'login' %}">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #ffffff;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #22c55e;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        p {
+            margin-bottom: 25px;
+            font-size: 15px;
+            color: #cbd5e1;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            background-color: #3b82f6;
+            color: #fff;
+            font-weight: 600;
+            transition: 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+        }
+
+        .redirect-text {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="icon">✔</div>
+        <h1>Account Activated Successfully!</h1>
+        <p>Your account has been verified. You can now log in and start using TheKME platform.</p>
+
+        <a href="{% url 'login' %}" class="btn">Go to Login</a>
+
+        <div class="redirect-text">
+            You will be redirected automatically in a few seconds...
+        </div>
+    </div>
+
+</body>
+</html>
