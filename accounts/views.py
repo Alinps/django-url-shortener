@@ -249,6 +249,7 @@ def forgot_password(request):
             otp = generate_otp(user)  # <-- pass user
 
             send_reset_otp(email, otp)
+            logger.info("otp email successfully sent", extra={"request_id":request.id,"email":email})
 
             try:
                 cache.set(

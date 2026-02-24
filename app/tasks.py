@@ -10,6 +10,8 @@ from .metrics import (flush_duration_seconds,
                       flush_event_count_total,
                       redis_click_count_backlog,
                       redis_click_event_backlog)
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -81,6 +83,7 @@ def handle_click_events(redis_conn, key):
 
 @shared_task
 def flush_analytics():
+
     redis_conn = get_redis_connection("default")
 
     lock_key = "analytics_flush_lock"
@@ -93,6 +96,7 @@ def flush_analytics():
 
     if not lock_acquired:
         flush_lock_failed_total.inc()
+        logger.warning("Tried to flush analytics lock")
         print("Flush already running.")
         return
     with flush_duration_seconds.time():
@@ -116,6 +120,7 @@ def flush_analytics():
                 redis_conn.rename(key, processing_key)
                 handle_click_events(redis_conn, processing_key)
             print("flush worked")
+            logger.info("flush analytics flushed successfully")
         finally:
             if redis_conn.get(lock_key) == lock_value.encode():
                 redis_conn.delete(lock_key)
