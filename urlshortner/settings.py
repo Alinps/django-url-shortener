@@ -279,3 +279,6 @@ LOGGING = {
         }
     }
 }
+import urlshortner.tracing
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+DjangoInstrumentor().instrument()

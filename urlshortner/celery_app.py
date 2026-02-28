@@ -2,7 +2,10 @@ import os
 from celery import Celery
 from dotenv import load_dotenv
 from pathlib import Path
+import urlshortner.tracing
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
 
+CeleryInstrumentor().instrument()
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 

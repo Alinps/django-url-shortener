@@ -20,3 +20,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+DjangoInstrumentor().instrument()

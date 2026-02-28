@@ -34,6 +34,9 @@ from django.views.decorators.cache import never_cache
 from redis.exceptions import RedisError
 import logging
 logger = logging.getLogger(__name__)
+from opentelemetry import trace
+tracer = trace.get_tracer(__name__)
+
 # Create your views here.
 
 
@@ -92,7 +95,7 @@ def home_page(request):
 
         daily_count = ShortURLMeta.objects.filter(
             user=request.user,
-            created_at__date=today
+            short_url__created_at__date=today
         ).count()
 
         if daily_count >= settings.CREATE_DAILY_LIMIT:
@@ -409,100 +412,107 @@ def delete_url(request,id):
 
 CACHE_TTL = 60 * 60 # 1 hour
 def redirect_url(request,short_code):
-    start_time = time.time()
-    try:
-        redirect_request_total.inc()
-
-        x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded:
-            ip = x_forwarded.split(",")[0]
-        else:
-            ip = request.META.get("REMOTE_ADDR")
-
-        if not check_rate_limit(ip):
-            logger.warning("Redirect URL rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
-            return rate_limited_response(
-                request,
-                settings.REDIRECT_RATE_WINDOW
-            )
-
-        cache_key=f"short_url:{short_code}"
-
-        #STEP 1: Try cache
+    with tracer.start_as_current_span("manual_test_span"):
+        print("Manual span triggered")
+        logger.info("manual span triggered", extra={"request_id": request.request_id, "short_code": short_code})
+        start_time = time.time()
         try:
-            cached = cache.get(cache_key)
-        except RedisError:
-            logger.error("Redis error! redirect cant connect to redis",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
-            cached = None
+            redirect_request_total.inc()
 
-        if cached:
-            cache_hit_total.inc()
-            if not cached["is_active"]:
-                logger.warning("accessed disabled url",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
-                raise Http404("This URL is disabled")
+            x_forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+            if x_forwarded:
+                ip = x_forwarded.split(",")[0]
+            else:
+                ip = request.META.get("REMOTE_ADDR")
 
-            # Enqueue analytics (NON-BLOCKING)
-            # record_click_event.delay(
-            #     cached["id"],
-            #     request.META.get("HTTP_USER_AGENT",""),
-            #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
-            # )
-            click_enqueued_total.inc()
-            try:
-                logger.info("enqueue_click event cached",extra={"request_id":request.request_id,"short_code":short_code})
-                enqueue_click.delay(
-                    cached["id"],
-                    request.META.get("HTTP_USER_AGENT",""),
-                    detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+            if not check_rate_limit(ip):
+                logger.warning("Redirect URL rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
+                return rate_limited_response(
+                    request,
+                    settings.REDIRECT_RATE_WINDOW
                 )
-                print("CACHE HIT")
-            except Exception:
-                logger.error("enqueue_click event can't be cached",extra={"request_id":request.request_id,"short_code":short_code})
+
+            cache_key=f"short_url:{short_code}"
+
+            #STEP 1: Try cache
+            try:
+                cached = cache.get(cache_key)
+            except RedisError:
+                logger.error("Redis error! redirect cant connect to redis",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
+                cached = None
+
+            if cached:
+                cache_hit_total.inc()
+                if not cached["is_active"]:
+                    logger.warning("accessed disabled url",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
+                    raise Http404("This URL is disabled")
+
+                # Enqueue analytics (NON-BLOCKING)
+                # record_click_event.delay(
+                #     cached["id"],
+                #     request.META.get("HTTP_USER_AGENT",""),
+                #     detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+                # )
+                click_enqueued_total.inc()
+                try:
+                    logger.info("enqueue_click event cached",extra={"request_id":request.request_id,"short_code":short_code})
+                    enqueue_click.delay(
+                        cached["id"],
+                        request.META.get("HTTP_USER_AGENT",""),
+                        detect_device_type(request.META.get("HTTP_USER_AGENT",""))
+                    )
+                    print("CACHE HIT")
+                    logger.info("redirect hit cache",
+                                extra={"request_id": request.request_id, "short_code": short_code})
+                except Exception:
+                    logger.error("enqueue_click event can't be cached",extra={"request_id":request.request_id,"short_code":short_code})
+                    pass
+
+                return redirect(cached["original_url"])
+
+            #STEP 2: Cache miss -> DB
+            cache_miss_total.inc()
+            url = get_object_or_404(
+                ShortURLCore.objects.only("id","original_url","is_active"), # New table
+                short_code=short_code,
+                # is_active=True
+            )
+
+            try:
+                cache.set(
+                    cache_key,
+                    {
+                        "id":url.id,
+                        "original_url":url.original_url,
+                        "is_active":url.is_active,
+                    },
+                    CACHE_TTL
+                )
+            except RedisError:
                 pass
+            click_enqueued_total.inc()
 
-            return redirect(cached["original_url"])
-
-        #STEP 2: Cache miss -> DB
-        cache_miss_total.inc()
-        url = get_object_or_404(
-            ShortURLCore.objects.only("id","original_url","is_active"), # New table
-            short_code=short_code,
-            # is_active=True
-        )
-
-        try:
-            cache.set(
-                cache_key,
-                {
-                    "id":url.id,
-                    "original_url":url.original_url,
-                    "is_active":url.is_active,
-                },
-                CACHE_TTL
-            )
-        except RedisError:
-            pass
-        click_enqueued_total.inc()
-
-        try:
-            logger.info("enqueue_click event cached",
+            try:
+                logger.info("enqueue_click event cached",
+                            extra={"request_id": request.request_id, "short_code": short_code})
+                enqueue_click.delay(
+                    url.id,
+                    request.META.get("HTTP_USER_AGENT", ""),
+                    detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
+                )
+            except Exception:
+                logger.error("enqueue_click event can't be cached",
+                             extra={"request_id": request.request_id, "short_code": short_code})
+                pass
+            logger.info("redirect hit db",
                         extra={"request_id": request.request_id, "short_code": short_code})
-            enqueue_click.delay(
-                url.id,
-                request.META.get("HTTP_USER_AGENT", ""),
-                detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
-            )
-        except Exception:
-            logger.error("enqueue_click event can't be cached",
-                         extra={"request_id": request.request_id, "short_code": short_code})
-            pass
-        print("from db")
-        if not url.is_active:
-            raise Http404("This URL is disabled")
-        return redirect(url.original_url)
-    finally:
-        duration = time.time()-start_time
-        redirect_latency_seconds.observe(duration)
+            print("from db")
+            if not url.is_active:
+                raise Http404("This URL is disabled")
+            return redirect(url.original_url)
+        finally:
+            duration = time.time()-start_time
+            redirect_latency_seconds.observe(duration)
 
 
 
