@@ -24,7 +24,6 @@ from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-
 from .metrics import (redirect_request_total,
                       cache_hit_total,
                       cache_miss_total,
@@ -48,16 +47,6 @@ def landingpage(request):
 
 
 
-
-
-
-
-#
-
-
-
-
-
 @never_cache
 @login_required
 @csrf_protect
@@ -75,11 +64,11 @@ def home_page(request):
             ip = request.META.get("REMOTE_ADDR")
 
         # --------------------------
-        # 1️⃣ Redis Burst Protection (Fail-Open)
+        # Redis Burst Protection (Fail-Open)
         # --------------------------
         try:
             if not check_create_rate_limit(ip, request.user.id):
-                logger.error("URL creation rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
+                logger.warning("URL creation rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
                 return rate_limited_response(
                     request,
                     settings.CREATE_RATE_WINDOW
@@ -89,7 +78,7 @@ def home_page(request):
             pass
 
         # --------------------------
-        # 2️⃣ DB Hard Daily Quota (Authoritative)
+        # DB Hard Daily Quota (Authoritative)
         # --------------------------
         today = timezone.now().date()
 
@@ -99,6 +88,7 @@ def home_page(request):
         ).count()
 
         if daily_count >= settings.CREATE_DAILY_LIMIT:
+            logger.warning("URL creation daily limit reached",extra={"ip":ip,"request_id":request.request_id})
             return rate_limited_response(
                 request,
                 settings.CREATE_RATE_WINDOW
@@ -212,7 +202,7 @@ def list_url(request):
     active_urls = urls.filter(short_url__is_active=True).count()
     disabled_urls = urls.filter(short_url__is_active=False).count()
 
-    # 👇 AJAX detection
+    # AJAX detection
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         results = []
         for url in page_obj:

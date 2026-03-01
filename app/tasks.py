@@ -13,6 +13,7 @@ from .metrics import (flush_duration_seconds,
 import logging
 logger = logging.getLogger(__name__)
 from opentelemetry import trace
+from .utils.get_trace_id import get_trace_id
 tracer = trace.get_tracer(__name__)
 
 
@@ -100,7 +101,9 @@ def flush_analytics():
 
         if not lock_acquired:
             flush_lock_failed_total.inc()
-            logger.warning("Tried to flush analytics lock")
+            logger.warning("Tried to flush analytics lock",extra={
+            "trace_id": get_trace_id()
+        })
             print("Flush already running.")
             return
         with flush_duration_seconds.time():
@@ -124,7 +127,7 @@ def flush_analytics():
                     redis_conn.rename(key, processing_key)
                     handle_click_events(redis_conn, processing_key)
                 print("flush worked")
-                logger.info("flush analytics flushed successfully")
+                logger.info("flush analytics flushed successfully",extra={"trace_id": get_trace_id()})
             finally:
                 if redis_conn.get(lock_key) == lock_value.encode():
                     redis_conn.delete(lock_key)

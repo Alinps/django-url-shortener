@@ -8,7 +8,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from redis import RedisError
-
 from accounts.forms import SignUp, login_form
 from accounts.utils.mail_sender import send_reset_otp
 from accounts.utils.otp_generate import generate_otp
@@ -20,7 +19,6 @@ from .utils.check_login_rate_limit import check_login_rate_limit
 from .utils.check_register_rate_limit import check_register_rate_limit
 from .utils.otp_utils import store_otp,verify_otp
 from .utils.verification_email import send_verification_email
-
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
@@ -47,6 +45,7 @@ def register(request):
             ip = request.META.get("REMOTE_ADDR")
 
         if not check_register_rate_limit(ip):
+            logger.warning("registration rate limit exceeded",extra={"request_id":request.request_id})
             return rate_limited_response(
                 request,
                 settings.REGISTER_RATE_WINDOW
@@ -63,6 +62,7 @@ def register(request):
             send_verification_email(request, user)
             logger.info("user_activation_email_send_successfully", extra={
                 "request_id": request.request_id,
+
             })
 
             return render(request, "verify_email_sent.html")
@@ -87,6 +87,7 @@ def login_user(request):
         email = request.POST.get("username") # using email login
 
         if not check_login_rate_limit(ip,email):
+            logger.warning("Login rate limit exceeded",extra={"request_id":request.request_id,})
             return rate_limited_response(
                 request,
                 settings.LOGIN_RATE_WINDOW
@@ -122,7 +123,7 @@ def activate_account(request, uidb64, token):
     User = get_user_model()
     user = None
     logger.info("user_initiated_activate_account", extra={
-        "request_id": request.request_id,
+        "request_id": request.request_id
     })
 
     try:
@@ -154,7 +155,7 @@ COOLDOWN_SECONDS = 300  # or use settings value
 
 def resend_activation(request):
     logger.info("user_requested_resend_activation_link", extra={
-        "request_id": request.request_id,
+        "request_id": request.request_id
     })
 
     if request.method == "POST":
@@ -180,8 +181,8 @@ def resend_activation(request):
             # -----------------------
             # 2️⃣ DB fallback cooldown
             # -----------------------
-            if not cooldown_active and user.last_activation_sent_at:
-                if now - user.last_activation_sent_at < timedelta(seconds=COOLDOWN_SECONDS):
+            if not cooldown_active and user.last_activation_sent_at: # type: ignore[attr-defined]
+                if now - user.last_activation_sent_at < timedelta(seconds=COOLDOWN_SECONDS): # type: ignore[attr-defined]
                     cooldown_active = True
 
             if cooldown_active:
@@ -208,7 +209,7 @@ def resend_activation(request):
             # -----------------------
             # Update DB fallback
             # -----------------------
-            user.last_activation_sent_at = now
+            user.last_activation_sent_at = now # type: ignore[attr-defined]
             user.save(update_fields=["last_activation_sent_at"])
 
         messages.success(
@@ -342,6 +343,7 @@ def logout_user(request):
         logout(request)
         logger.info("user_attempt_logout", extra={
             "request_id": request.request_id,
+
         })
         return redirect('login')
     return render(request,'logout.html')
