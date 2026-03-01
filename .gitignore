@@ -7,3 +7,24 @@ prometheus_data/
 media/
 staticfiles/
 celerybeat-schedule*
+
+
+
+
+# 🔹 VS Code
+.vscode/
+
+# 🔹 mypy cache
+.mypy_cache/
+
+# 🔹 Pytest cache (if ever used)
+.pytest_cache/
+
+# 🔹 OS junk
+.DS_Store
+Thumbs.db
+
+# 🔹 Coverage reports (if you add later)
+htmlcov/
+.coverage
+.idea/

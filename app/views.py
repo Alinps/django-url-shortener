@@ -138,7 +138,7 @@ def home_page(request):
                     )
 
                     # Generate based on DB id
-                    obfuscated = obfuscate_id(core.id)
+                    obfuscated = obfuscate_id(core.id)  # type: ignore[attr-defined]
                     short_code = encode_base62(obfuscated)
 
                     core.short_code = short_code
@@ -217,7 +217,7 @@ def list_url(request):
         results = []
         for url in page_obj:
             results.append({
-                "id": url.id,
+                "id": url.id,  # type: ignore[attr-defined]
                 "title": url.title,
                 "original_url": url.short_url.original_url,
                 "short_code": url.short_url.short_code,
@@ -355,7 +355,7 @@ def update_url(request,id):
             user=request.user
         )
         return JsonResponse({
-            "id":meta.id,
+            "id":meta.pk,  # type: ignore[attr-defined]
             "title":meta.title,
             "original_url":meta.short_url.original_url,
             "custom_url":meta.short_url.short_code
@@ -370,7 +370,7 @@ def update_url(request,id):
 
 
 
-@login_required
+@login_required  # type: ignore[attr-defined]
 def delete_url(request,id):
     if request.method == "DELETE":
         with transaction.atomic():
@@ -482,7 +482,7 @@ def redirect_url(request,short_code):
                 cache.set(
                     cache_key,
                     {
-                        "id":url.id,
+                        "id":url.pk,  # type: ignore[attr-defined]
                         "original_url":url.original_url,
                         "is_active":url.is_active,
                     },
@@ -496,7 +496,7 @@ def redirect_url(request,short_code):
                 logger.info("enqueue_click event cached",
                             extra={"request_id": request.request_id, "short_code": short_code})
                 enqueue_click.delay(
-                    url.id,
+                    url.id,  # type: ignore[attr-defined]
                     request.META.get("HTTP_USER_AGENT", ""),
                     detect_device_type(request.META.get("HTTP_USER_AGENT", ""))
                 )
@@ -592,7 +592,7 @@ def dashboard_stats(request):
     print(total_clicks)
 
     url_stats = {
-        url.id: url.click_count
+        url.pk: url.click_count 
         for url in urls
     }
 
@@ -604,7 +604,7 @@ def dashboard_stats(request):
 
 
 
-@login_required
+@login_required  # type: ignore[attr-defined]
 def analytics_view(request,url_id):
     url = get_object_or_404(
         ShortURLMeta.objects.select_related("short_url"),
