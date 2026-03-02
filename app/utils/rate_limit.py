@@ -26,7 +26,7 @@ def check_rate_limit(ip):
     print("REDIS KEY:", key)
 
     current= cache.incr(key)
-    print("current count: ",current)
+
     return True # fail open
 
 
@@ -70,6 +70,6 @@ def check_create_rate_limit(ip,user_id):
         return False
     else:
         count=cache.incr(user_key)
-        print("current count:",count)
+
 
     return True

@@ -25,7 +25,7 @@ def check_login_rate_limit(ip,email):
         return False
     else:
         counterip=cache.incr(ip_key)
-        print("login counter ip: ",counterip)
+      
 
     # Email check
 
@@ -35,6 +35,6 @@ def check_login_rate_limit(ip,email):
         return False
     else:
         counteremail=cache.incr(email_key)
-        print("login counter email: ",counteremail)
+ 
 
     return True

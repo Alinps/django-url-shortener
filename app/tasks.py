@@ -30,7 +30,7 @@ def enqueue_click(short_url_id, user_agent, device_type):
             f"click_events:{short_url_id}",
             f"{user_agent}|{device_type}"
         )
-        print("enqueued click")
+   
 
 
 def handle_click_count(redis_conn, key):
@@ -104,7 +104,7 @@ def flush_analytics():
             logger.warning("Tried to flush analytics lock",extra={
             "trace_id": get_trace_id()
         })
-            print("Flush already running.")
+   
             return
         with flush_duration_seconds.time():
             try:
@@ -147,4 +147,3 @@ def measure_backlog():
 
         redis_click_count_backlog.set(len(click_count_keys))
         redis_click_event_backlog.set(total_events)
-        print("metrics measured backlog")

@@ -451,7 +451,7 @@ def redirect_url(request,short_code):
                         request.META.get("HTTP_USER_AGENT",""),
                         detect_device_type(request.META.get("HTTP_USER_AGENT",""))
                     )
-                    print("CACHE HIT")
+                
                     logger.info("redirect hit cache",
                                 extra={"request_id": request.request_id, "short_code": short_code})
                 except Exception:
@@ -496,7 +496,7 @@ def redirect_url(request,short_code):
                 pass
             logger.info("redirect hit db",
                         extra={"request_id": request.request_id, "short_code": short_code})
-            print("from db")
+    
             if not url.is_active:
                 raise Http404("This URL is disabled")
             return redirect(url.original_url)
