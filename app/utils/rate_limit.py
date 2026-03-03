@@ -56,10 +56,10 @@ def check_create_rate_limit(ip,user_id):
 
         now = timezone.now()
 
-        tomorrow = now.date() + timezone.timedelta(days=1) # To mark time upto 24 hours
+        tomorrow = now.date() + timezone.timedelta(days=1) # type: ignore[attr-defined] # To mark time upto 24 hours
 
         midnight = timezone.make_aware(
-            timezone.datetime.combine(tomorrow, timezone.datetime.min.time())
+            timezone.datetime.combine(tomorrow, timezone.datetime.min.time()) # type: ignore[attr-defined]
         )
 
         seconds_until_midnight = int((midnight - now).total_seconds())

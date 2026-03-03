@@ -68,7 +68,7 @@ def home_page(request):
         # --------------------------
         try:
             if not check_create_rate_limit(ip, request.user.id):
-                logger.warning("URL creation rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
+                logger.warning("URL creation rate limit exceeded",extra={"ip":ip,"request_id":request.request_id,"service":"django"})
                 return rate_limited_response(
                     request,
                     settings.CREATE_RATE_WINDOW
@@ -88,7 +88,7 @@ def home_page(request):
         ).count()
 
         if daily_count >= settings.CREATE_DAILY_LIMIT:
-            logger.warning("URL creation daily limit reached",extra={"ip":ip,"request_id":request.request_id})
+            logger.warning("URL creation daily limit reached",extra={"ip":ip,"request_id":request.request_id,"service":"django"})
             return rate_limited_response(
                 request,
                 settings.CREATE_RATE_WINDOW
@@ -257,6 +257,7 @@ def update_url(request,id):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
+            logger.error("Invalid JSON Format in update data pack",extra={"request_id":request.request_id,"service":"django"})
             return JsonResponse({"success": False, "message": "Invalid JSON"})
         print("id",id)
 
@@ -416,7 +417,7 @@ def redirect_url(request,short_code):
                 ip = request.META.get("REMOTE_ADDR")
 
             if not check_rate_limit(ip):
-                logger.warning("Redirect URL rate limit exceeded",extra={"ip":ip,"request_id":request.request_id})
+                logger.warning("Redirect URL rate limit exceeded",extra={"ip":ip,"request_id":request.request_id,"service":"django"})
                 return rate_limited_response(
                     request,
                     settings.REDIRECT_RATE_WINDOW
@@ -428,13 +429,13 @@ def redirect_url(request,short_code):
             try:
                 cached = cache.get(cache_key)
             except RedisError:
-                logger.error("Redis error! redirect cant connect to redis",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
+                logger.error("Redis error! redirect cant connect to redis",extra={"ip":ip,"request_id":request.request_id,"service":"redis","short_code":short_code})
                 cached = None
 
             if cached:
                 cache_hit_total.inc()
                 if not cached["is_active"]:
-                    logger.warning("accessed disabled url",extra={"ip":ip,"request_id":request.request_id,"short_code":short_code})
+                    logger.warning("accessed disabled url",extra={"ip":ip,"request_id":request.request_id,"service":"django","short_code":short_code})
                     raise Http404("This URL is disabled")
 
                 # Enqueue analytics (NON-BLOCKING)
@@ -445,7 +446,7 @@ def redirect_url(request,short_code):
                 # )
                 click_enqueued_total.inc()
                 try:
-                    logger.info("enqueue_click event cached",extra={"request_id":request.request_id,"short_code":short_code})
+                    logger.info("enqueue_click event cached",extra={"request_id":request.request_id,"service":"redis","short_code":short_code})
                     enqueue_click.delay(
                         cached["id"],
                         request.META.get("HTTP_USER_AGENT",""),
@@ -453,9 +454,9 @@ def redirect_url(request,short_code):
                     )
                 
                     logger.info("redirect hit cache",
-                                extra={"request_id": request.request_id, "short_code": short_code})
+                                extra={"request_id": request.request_id,"service":"redis", "short_code": short_code})
                 except Exception:
-                    logger.error("enqueue_click event can't be cached",extra={"request_id":request.request_id,"short_code":short_code})
+                    logger.error("enqueue_click event can't be cached",extra={"request_id":request.request_id,"service":"redis","short_code":short_code})
                     pass
 
                 return redirect(cached["original_url"])
@@ -484,7 +485,7 @@ def redirect_url(request,short_code):
 
             try:
                 logger.info("enqueue_click event cached",
-                            extra={"request_id": request.request_id, "short_code": short_code})
+                            extra={"request_id": request.request_id,"service":"redis", "short_code": short_code})
                 enqueue_click.delay(
                     url.id,  # type: ignore[attr-defined]
                     request.META.get("HTTP_USER_AGENT", ""),
@@ -492,10 +493,10 @@ def redirect_url(request,short_code):
                 )
             except Exception:
                 logger.error("enqueue_click event can't be cached",
-                             extra={"request_id": request.request_id, "short_code": short_code})
+                             extra={"request_id": request.request_id,"service":"redis" ,"short_code": short_code})
                 pass
             logger.info("redirect hit db",
-                        extra={"request_id": request.request_id, "short_code": short_code})
+                        extra={"request_id": request.request_id,"service":"django-mysql", "short_code": short_code})
     
             if not url.is_active:
                 raise Http404("This URL is disabled")

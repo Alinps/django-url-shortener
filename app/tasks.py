@@ -102,7 +102,8 @@ def flush_analytics():
         if not lock_acquired:
             flush_lock_failed_total.inc()
             logger.warning("Tried to flush analytics lock",extra={
-            "trace_id": get_trace_id()
+            "trace_id": get_trace_id(),
+            "service":"celery"
         })
    
             return
@@ -127,7 +128,7 @@ def flush_analytics():
                     redis_conn.rename(key, processing_key)
                     handle_click_events(redis_conn, processing_key)
                 print("flush worked")
-                logger.info("flush analytics flushed successfully",extra={"trace_id": get_trace_id()})
+                logger.info("flush analytics flushed successfully",extra={"trace_id": get_trace_id(),"service":"celery"})
             finally:
                 if redis_conn.get(lock_key) == lock_value.encode():
                     redis_conn.delete(lock_key)

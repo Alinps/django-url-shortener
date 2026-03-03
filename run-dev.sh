@@ -2,7 +2,7 @@
 
 cleanup() {
   echo "Stopping all services..."
-  kill $DJANGO_PID $WORKER_PID $BEAT_PID 2>/dev/null
+  kill $DJANGO_PID $WORKER_PID $BEAT_PID  2>/dev/null
   echo "Stopping Docker observability stack.."
   docker compose -f observability/docker-compose.yml down
   echo "Cleaning prometheus data.."
@@ -23,6 +23,9 @@ BEAT_PID=$!
 echo "Starting Django server..."
 python manage.py runserver &
 DJANGO_PID=$!
+
+
+
 
 
 wait

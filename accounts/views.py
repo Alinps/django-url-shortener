@@ -45,7 +45,7 @@ def register(request):
             ip = request.META.get("REMOTE_ADDR")
 
         if not check_register_rate_limit(ip):
-            logger.warning("registration rate limit exceeded",extra={"request_id":request.request_id})
+            logger.warning("registration rate limit exceeded",extra={"request_id":request.request_id,"service":"django"})
             return rate_limited_response(
                 request,
                 settings.REGISTER_RATE_WINDOW
@@ -62,6 +62,7 @@ def register(request):
             send_verification_email(request, user)
             logger.info("user_activation_email_send_successfully", extra={
                 "request_id": request.request_id,
+                "service":"django"
 
             })
 
@@ -87,7 +88,7 @@ def login_user(request):
         email = request.POST.get("username") # using email login
 
         if not check_login_rate_limit(ip,email):
-            logger.warning("Login rate limit exceeded",extra={"request_id":request.request_id,})
+            logger.warning("Login rate limit exceeded",extra={"request_id":request.request_id,"service":"django"})
             return rate_limited_response(
                 request,
                 settings.LOGIN_RATE_WINDOW
@@ -100,7 +101,7 @@ def login_user(request):
             if not user.is_active:
                 logger.warning("user_account_is_inactive", extra={
                     "request_id": request.request_id,
-                    "user_email": email
+                    "user_email": email,
                 })
                 messages.warning(request,
                                  "Your account is not activated. Please verify your email.")
@@ -108,7 +109,8 @@ def login_user(request):
             login(request,user)
             logger.info("user_login_attempt", extra={
                 "request_id": request.request_id,
-                "user_email": email
+                "user_email": email,
+                "service":"django"
             })
             return redirect('home')
     else:
@@ -123,7 +125,8 @@ def activate_account(request, uidb64, token):
     User = get_user_model()
     user = None
     logger.info("user_initiated_activate_account", extra={
-        "request_id": request.request_id
+        "request_id": request.request_id,
+        "service":"django"
     })
 
     try:
@@ -155,7 +158,8 @@ COOLDOWN_SECONDS = 300  # or use settings value
 
 def resend_activation(request):
     logger.info("user_requested_resend_activation_link", extra={
-        "request_id": request.request_id
+        "request_id": request.request_id,
+        "service":"django"
     })
 
     if request.method == "POST":
@@ -250,7 +254,7 @@ def forgot_password(request):
             otp = generate_otp(user)  # <-- pass user
 
             send_reset_otp(email, otp)
-            logger.info("otp email successfully sent", extra={"request_id":request.id,"email":email})
+            logger.info("otp email successfully sent", extra={"request_id":request.id,"email":email,"service":"django"})
 
             try:
                 cache.set(
@@ -291,19 +295,22 @@ def verify_reset_otp(request):
         if result == "expired":
             logger.warning("forgot_password_otp_expired", extra={
                 "request_id": request.request_id,
-                "user_email": email
+                "user_email": email,
+                "service":"django"
             })
             return render(request,"reset_password.html",{"error":"OTP expired"})
         if result == "locked":
             logger.warning("reached_max_otp_validation", extra={
                 "request_id": request.request_id,
-                "user_email": email
+                "user_email": email,
+                "service":"django"
             })
             return render(request,"reset_password.html",{"error":"Too many attempts. Try again later."})
         if result == "invalid":
             logger.info("forgot_password_otp_invalid_attempt", extra={
                 "request_id": request.request_id,
-                "user_email": email
+                "user_email": email,
+                "service":"django"
             })
             return render(request,"reset_password.html",{"error":"Invalid OTP"})
 
@@ -322,7 +329,8 @@ def verify_reset_otp(request):
             del request.session["reset_email"]
             logger.info("forgot_password_attempt_success", extra={
                 "request_id": request.request_id,
-                "user_email": email
+                "user_email": email,
+                "service":"django"
             })
             return redirect("login")
 
@@ -343,6 +351,7 @@ def logout_user(request):
         logout(request)
         logger.info("user_attempt_logout", extra={
             "request_id": request.request_id,
+            "service":"django"
 
         })
         return redirect('login')
