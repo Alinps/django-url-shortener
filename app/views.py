@@ -43,6 +43,8 @@ tracer = trace.get_tracer(__name__)
 
 
 def landingpage(request):
+    if request.user.is_authenticated:
+        return redirect('list') 
     return render(request,'landingpage.html')
 
 
