@@ -14,7 +14,7 @@
   font-weight: bold;
 }
 .gradient-text{
- background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
+  background: linear-gradient(135deg, #F8FAFC, #E0F2FE, #7DD3FC);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
@@ -98,17 +98,17 @@
 
     display: none;
 
-    /* 👇 INSERT THESE */
+  
     transform: translateY(-10px);
     opacity: 0;
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
-  /* 🟢 MENU VISIBLE STATE */
+
   .nav-links.active {
     display: flex;
 
-    /* 👇 AND THESE */
+
     transform: translateY(0);
     opacity: 1;
   }

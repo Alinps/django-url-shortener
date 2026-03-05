@@ -1,18 +1,4 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-  overflow: hidden;
-    font-weight: bold;
-  font-size: 1.05rem;
-}
 
-body {
-  background: radial-gradient(circle at top, #0b1220, #05070d);
-  color: #e5e7eb;
-  min-height: 100vh;
-}
 /* PAGE CENTERING */
 .page {
   display: flex;
@@ -126,11 +112,7 @@ button {
   cursor: pointer;
 }
 
-.gradient-text{
-  background: linear-gradient(90deg, #38bdf8, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+
 
 
 /* ERRORS */

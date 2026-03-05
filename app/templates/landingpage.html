@@ -1,32 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {%load static%}
-  <meta charset="UTF-8" />
-  <title>Shortly — Smart URL Shortener</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% extends "base/base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/landing_page.css' %}">
+{% endblock %}
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="{% static 'shotly_favicon.png' %}">
 
-  <link rel="stylesheet" href="{%static 'css/landingpage.css'%}">
-   <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
-     <link rel="stylesheet" href="{%static 'css/footer.css'%}">
-</head>
-<body>
+{% block content%}
 
-  <!-- NAVBAR -->
-  <!-- <header class="navbar">
-    <div class="logo navbar-brand">🔗 Shortly</div>
-    <div class="nav-actions">
-       <a href="{% url 'aboutus' %}" class="btn ghost">About Us</a>
-{#      <a href="#" class="btn primary">Register Now</a> #}
-    </div>
-  </header> -->
-   {%include 'partials/navbar.html'%}
-
-  <!-- HERO -->
-  <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
 
@@ -71,7 +51,4 @@
   </div>
 </section>
 
-  <!-- FOOTER -->
-{%include 'partials/footer.html'%}
-</body>
-</html>
+{% endblock %}
