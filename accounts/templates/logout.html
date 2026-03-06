@@ -1,18 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  {%load static%}
-  <title>Log out — Shortly</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}
+Logout
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{%static 'css/logout_confirm.css'%}">
+{% endblock %}
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{%static 'css/logout_confirm.css'%}">
-  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
-  <link rel="stylesheet" href="{%static 'css/footer.css'%}">
-</head>
-<body>
-{%include 'partials/navbar.html'%}
+{% block content%}
+
 <main class="page">
 
   <!-- HEADER -->
@@ -52,6 +48,5 @@
   </section>
 
 </main>
-{%include 'partials/footer.html'%}
-</body>
-</html>
+
+{% endblock %}

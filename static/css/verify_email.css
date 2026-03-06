@@ -1,0 +1,40 @@
+  body {
+            background: linear-gradient(135deg, #141e30, #243b55);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .verify-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            max-width: 500px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.4s ease-in-out;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .verify-icon {
+            font-size: 50px;
+            color: #0d6efd;
+        }
+
+        .verify-title {
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .verify-text {
+            color: #ffffff;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            border-radius: 8px;
+            padding: 10px 20px;
+        }

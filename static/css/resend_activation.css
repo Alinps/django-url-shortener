@@ -1,0 +1,16 @@
+body {
+            background: linear-gradient(135deg, #141e30, #243b55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color:#ffffff;
+        }
+        .card-box {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 500px;
+        }

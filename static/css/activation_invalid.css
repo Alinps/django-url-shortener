@@ -1,0 +1,32 @@
+
+.card-wrapper {
+            max-width: 520px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 55px;
+            color: #ffffff;
+        }
+
+        .title {
+            font-weight: 600;
+            margin-top: 20px;
+            color:#000000;
+        }
+
+        .description {
+            color: #fffffa;
+            margin-top: 15px;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
