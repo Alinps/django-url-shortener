@@ -1,22 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  {%load static%}
-  <title>Create Short Link — Shortly</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}
+Home
+{% endblock %}
+{% block extra_css %}
   <link rel="stylesheet" href="{%static 'css/home.css'%}">
-  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
-</head>
-<body>
+{% endblock %}
 
-  <!-- NAVBAR (reuse your partial in Django later) -->
- {%include 'partials/navbar.html'%}
 
-  <!-- MAIN -->
-  <main class="container">
+{% block content%}
+
+ <main class="container">
     <div class="card">
 
       <h1>Shorten a link</h1>
@@ -73,5 +67,4 @@
     </div>
   </main>
 
-</body>
-</html>
+{% endblock %}

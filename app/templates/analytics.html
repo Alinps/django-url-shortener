@@ -1,17 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  {% load static %}
-  <meta charset="UTF-8">
-  <title>Analytics</title>
-  <link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}
+Analytics
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+{% endblock %}
+
+{% block head_js %}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+{% endblock %}
 
-</head>
+{% block content%}
 
-<body>
-  <div class="analytics-container">
+<div class="analytics-container">
 
     <!-- Header -->
     <div class="analytics-header">
@@ -97,7 +100,11 @@
   </div>
   </div>
 
-  <script>
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
     const ctx = document.getElementById("clickChart");
 
     new Chart(ctx, {
@@ -193,6 +200,5 @@
   });
 </script>
 
+{% endblock %}
 
-</body>
-</html>

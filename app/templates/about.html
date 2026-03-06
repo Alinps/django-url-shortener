@@ -1,18 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {%load static%}
-  <meta charset="UTF-8">
-  <title>About Us — Shortly</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}
+About
+{% endblock %}
+{% block extra_css %}
   <link rel="stylesheet" href="{%static 'css/about.css'%}">
-  <link rel="stylesheet" href="{%static 'css/navbar.css'%}">
-  <link rel="stylesheet" href="{%static 'css/footer.css'%}">
-</head>
-<body>
- {%include 'partials/navbar.html'%}
+{% endblock %}
+
+
+{% block content%}
+
 <main class="page">
 
   <!-- HERO -->
@@ -105,6 +102,5 @@
   </section>
 
 </main>
-{%include 'partials/footer.html'%}
-</body>
-</html>
+
+{% endblock %}

@@ -1,92 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Too Many Requests</title>
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}
+Rate limiting reached
+{% endblock %}
 
-    <!-- Auto refresh after retry_after seconds -->
-    <meta http-equiv="refresh" content="{{ retry_after|default:60 }}">
+{% block extra_head %}
+ <meta http-equiv="refresh" content="{{ retry_after|default:60 }}">
+{% endblock %}
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+{% endblock %}
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #141e30, #243b55);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            color: #ffffff;
-        }
 
-        .card {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            border-radius: 16px;
-            padding: 40px;
-            width: 420px;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.4s ease-in-out;
-        }
-
-        h1 {
-            margin-bottom: 10px;
-            font-size: 26px;
-        }
-
-        .icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-
-        .countdown {
-            font-weight: bold;
-            font-size: 16px;
-            margin: 15px 0;
-        }
-
-        .btn {
-            margin-top: 20px;
-            padding: 12px 22px;
-            background: #00c6ff;
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            background: #00aaff;
-            transform: translateY(-2px);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            opacity: 0.6;
-        }
-    </style>
-</head>
-
-<body>
+{% block content%}
 
 <div class="card">
     <div class="icon">🚦</div>
@@ -109,6 +36,10 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+
 <script>
     // Countdown timer (visual only)
     let seconds = parseInt(document.getElementById("timer").innerText);
@@ -124,5 +55,4 @@
     }, 1000);
 </script>
 
-</body>
-</html>
+{% endblock %}
