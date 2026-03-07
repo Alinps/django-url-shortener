@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shortly{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/favicon/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon/apple-touch-icon.png' %}">
     <link href="{%static 'css/base.css'%}" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -21,6 +25,44 @@
     {% include 'partials/footer.html' %}
     <script src="{% static 'js/base.js' %}"></script>
     {% block extra_js %}{% endblock %}
+
+
+    <!-- LOGOUT MODAL -->
+<div id="logoutModal" class="logout-overlay hidden">
+
+  <div class="logout-card">
+
+    <div class="logout-icon">🔐</div>
+
+    <h2>Log out of Shortly?</h2>
+
+    <p>
+      Are you sure you want to log out of your account?
+      You can log back in anytime.
+    </p>
+
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+
+      <div class="logout-actions">
+        <button type="button"
+                class="logout-btn logout-cancel"
+                onclick="closeLogoutModal()">
+          Cancel
+        </button>
+
+        <button type="submit"
+                class="logout-btn logout-confirm">
+          Log out
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+<script src="{%static 'js/logout.js'%}"></script>
 
 </body>
 </html>

@@ -1,16 +1,24 @@
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
   font-weight: bold;
-  font-size: 1.05rem;
 }
 
 body {
   background: radial-gradient(circle at top, #1f2f4d, #05070d);
   color: #e5e7eb;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+} */
+
+.page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 
@@ -20,15 +28,18 @@ h1 {
   -webkit-text-fill-color: transparent;
   text-shadow: 0 4px 20px rgba(125, 211, 252, 0.35);
   font-weight: 700;
+  font-size: 28px;
+  color: #f1f5f9;
 }
 
 /* MAIN CONTAINER */
 .container {
-  min-height: calc(100vh - 72px);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
+  flex: 1;
+  display: flex;
 }
 
 /* CARD */

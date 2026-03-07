@@ -1,11 +1,24 @@
 
 /* PAGE CENTERING */
+
+/* body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+} */
+
 .page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* .page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-}
+} */
 
 /* CARD */
 .signup-card {

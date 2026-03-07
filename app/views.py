@@ -204,6 +204,8 @@ def list_url(request):
     active_urls = urls.filter(short_url__is_active=True).count()
     disabled_urls = urls.filter(short_url__is_active=False).count()
 
+  
+
     # AJAX detection
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         results = []
@@ -241,6 +243,7 @@ def list_url(request):
         "total_urls": total_urls,
         "active_urls": active_urls,
         "disabled_urls": disabled_urls,
+
     })
 
 

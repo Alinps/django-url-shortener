@@ -55,12 +55,13 @@ Dashboard
       <span class="label">Total Clicks</span>
       <span class="value" id="total">{{total_clicks}}</span>
     </div>
-<a href="{%url 'home'%}">
+
     <div class="stat-card">
-      <span class="label">Create new Short Link ➕ </span>
-      <span class="value"></span>
+      <a href="{% url 'home' %}" class="card-link">
+        <span class="label">Create new Short Link ➕</span>
+        <span class="value"></span>
+      </a>
     </div>
-</a>
 <div class="stats-header">
   <button id="refreshStatsBtn" class="refresh-btn">
     🔄 Refresh Stats
@@ -91,7 +92,7 @@ Dashboard
 
     <!-- Date -->
     <div class="cell cell-date">
-      {{ url.created_at|date:"M d, Y" }}
+      {{ url.short_url.created_at|date:"M d, Y" }}
     </div>
 
     <!-- Clicks -->
@@ -112,22 +113,39 @@ Dashboard
 
     <!-- Actions -->
     <div class="cell cell-actions">
-      <span class="icon-btn {% if url.short_url.is_active %}active{% endif %}"
-            onclick="toggleStatus('{{ url.id }}')">⏻</span>
+      <span class="icon-btn tooltip {% if url.short_url.is_active %}active{% endif %}"
+            onclick="toggleStatus('{{ url.id }}')">
+            ⏻
+            <span class="tooltip-text">Toggle status</span>
+      </span>
 
-      <span class="icon-btn edit"
-            onclick="openEdit('{{ url.id }}')">📝</span>
+      <span class="icon-btn edit tooltip"
+            onclick="openEdit('{{ url.id }}')">
+            📝
+            <span class="tooltip-text">Edit</span>
+      </span>
 
-      <span class="icon-btn delete"
-            onclick="openDelete('{{ url.id }}')">🗑</span>
+      <span class="icon-btn delete tooltip"
+            onclick="openDelete('{{ url.id }}')">
+            🗑
+          <span class="tooltip-text">Delete</span>
+      </span>
 
 
-      <a class="icon-btn share"
+      <a class="icon-btn share tooltip"
         data-url="{{ request.scheme }}://{{ request.get_host }}/{{ url.short_url.short_code }}"
          onclick="openShare('{{ url.id }}')">
-        <img src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff" width="20px" height="20px">
+        <img  src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff" width="20px" height="20px">
+         <span class="tooltip-text">Share</span>
+         </a>
+     
+         
+        </span>
       </a>
-      <a class="icon-btn" href="{% url 'analytics' url.id %}">📊</a>
+      <a class="icon-btn tooltip" href="{% url 'analytics' url.id %}">
+        📊
+        <span class="tooltip-text">Analytics</span>
+      </a>
 
     </div>
 

@@ -1,17 +1,17 @@
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
     font-weight: bold;
-  font-size: 1.05rem;
+
 }
 
 body {
   background: radial-gradient(circle at top, #1f2f4d, #05070d);
   color: #e5e7eb;
   min-height: 100vh;
-}
+} */
 
 /* PAGE */
 .page {
@@ -76,7 +76,7 @@ body {
 }
 
 .btn {
-  padding: 0.7rem 1.6rem;
+  padding: 0.6rem 1.6rem;
   border-radius: 999px;
   text-decoration: none;
   font-size: 0.9rem;

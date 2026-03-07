@@ -1,11 +1,11 @@
-  body {
+  /* body {
             background: linear-gradient(135deg, #141e30, #243b55);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-        }
+        } */
 
         .verify-card {
             background: rgba(255, 255, 255, 0.08);

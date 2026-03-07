@@ -1,9 +1,9 @@
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
-  font-size: 1.05rem;
+
 
 }
 
@@ -16,8 +16,9 @@ body {
   color: #e5e7eb;
   min-height: 100vh;
   font-weight: 600;
+  
 
-}
+} */
 
 /* PAGE */
 .page {
@@ -28,13 +29,16 @@ body {
 
 /* HEADER */
 .page-header h1 {
-  font-size: 2.2rem;
   margin-bottom: 0.4rem;
+  font-weight: 700;
+  font-size: 28px;
+  color: #f1f5f9;
 }
 
 .subtitle {
   color: #c9d0d8;
   font-size: 0.95rem;
+  
 }
 
 /* STATS */
@@ -51,6 +55,7 @@ body {
   border-radius: 16px;
   padding: 1.2rem 1.6rem;
   min-width: 180px;
+  transition: transform 0.35s ease, background 0.35s ease;
 }
 
 .stat-card .label {
@@ -61,6 +66,18 @@ body {
 .stat-card .value {
   font-size: 1.6rem;
   font-weight: 700;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+}
+.card-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
 }
 
 .value.red { 
@@ -165,12 +182,14 @@ span.short:first-child:hover{
   width: 28px;
   height: 28px;
   font-weight: bold;
+   z-index: 5;
+ 
 }
 
 .tooltip-text {
   visibility: hidden;
   opacity: 0;
-
+   z-index: 100;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -263,7 +282,7 @@ span.short:first-child:hover{
   align-items: center;
   justify-content: center;
 
-  width: 34px;
+  width: 36px;
   height: 34px;
 
   background: rgba(255, 255, 255, 0.08);
@@ -404,27 +423,30 @@ a{
 .url-card {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
+   overflow: visible;
   border: 1px solid var(--border-soft);
   border-radius: 16px;
   padding: 16px 20px;
+  z-index: 1;
   color: var(--text-main);
   transition: background 0.2s ease;
 }
 
 .url-card:hover {
   background: var(--bg-hover);
+  z-index: 20;  
 }
 
 /* ===== LIST VIEW ROW GRID ===== */
 .list-view .url-card {
   display: grid;
   grid-template-columns:
-    200px   /* title */
+    185px   /* title */
     1fr     /* urls */
-    140px   /* date */
+    120px   /* date */
     80px    /* clicks */
     90px    /* status */
-    160px;  /* actions */
+    190px;  /* actions */
   align-items: center;
   column-gap: 16px;
 }
@@ -536,7 +558,7 @@ a{
 
 
 /*edit and delete modal css*/
-.modal-overlay {
+/* .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(10, 8, 30, 0.75);
@@ -545,7 +567,39 @@ a{
   justify-content: center;
   align-items: center;
   z-index: 999;
+} */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 30, 0.75);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+
+  transition: opacity 0.25s ease;
 }
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* .modal-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid #2b2255;
+  border-radius: 18px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+} */
 
 .modal-card {
   background: rgba(255,255,255,0.04);
@@ -555,6 +609,14 @@ a{
   width: 100%;
   max-width: 420px;
   box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+  transform: translateY(25px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.modal-overlay.active .modal-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .modal-card h2 {
@@ -754,7 +816,22 @@ a{
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   z-index: 1000;
+
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  opacity: 0;
+
+  transition: opacity 0.25s ease;
+
+
 }
+
 
 /* Share card */
 .share-card {
@@ -918,7 +995,15 @@ a{
     max-width:992px;
     border-collapse: separate;
     border-spacing: 0;
-     background: none;
+     background: none;  /* body {
+            background: linear-gradient(135deg, #141e30, #243b55);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        } */
+
   border-radius: 0;
   padding: 0;
   box-shadow: none;

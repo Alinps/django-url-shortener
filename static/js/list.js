@@ -13,11 +13,13 @@ function openEdit(id) {
 
   // document.getElementById("edit-status").value = isActive === "True" ? "true" : "false";
 
-  document.getElementById("editModal").style.display = "flex";
+  // document.getElementById("editModal").style.display = "flex";
+  document.getElementById("editModal").classList.add("active");
 }
 
 function closeEdit() {
-  document.getElementById("editModal").style.display = "none";
+  // document.getElementById("editModal").style.display = "none";
+    document.getElementById("editModal").classList.remove("active");
 }
 
 //logic for edit ajax
@@ -74,11 +76,11 @@ let deleteId = null;
 
 function openDelete(id) {
   deleteId = id;
-  document.getElementById("deleteModal").style.display = "flex";
+  document.getElementById("deleteModal").classList.add("active");
 }
 
 function closeDelete() {
-  document.getElementById("deleteModal").style.display = "none";
+  document.getElementById("deleteModal").classList.remove("active");
 }
 
 //logic for delete ajax
@@ -375,6 +377,44 @@ function renderCards(results) {
           ${url.is_active ? "Active" : "Disabled"}
         </span>
       </div>
+
+    <div class="cell cell-actions">
+
+    <span class="icon-btn tooltip ${url.is_active ? "active" : ""}"
+          onclick="toggleStatus('${url.id}')">
+      ⏻
+      <span class="tooltip-text">Toggle status</span>
+    </span>
+
+    <span class="icon-btn edit tooltip"
+          onclick="openEdit('${url.id}')">
+      📝
+      <span class="tooltip-text">Edit</span>
+    </span>
+
+    <span class="icon-btn delete tooltip"
+          onclick="openDelete('${url.id}')">
+      🗑
+      <span class="tooltip-text">Delete</span>
+    </span>
+
+    <a class="icon-btn share tooltip"
+       data-url="${BASE_URL}/${url.short_code}"
+       onclick="openShare('${url.id}')">
+       <img src="https://img.icons8.com/?size=100&id=wgYy0nz8B9SS&format=png&color=ffffff"
+            width="20" height="20">
+       <span class="tooltip-text">Share</span>
+    </a>
+
+    <a class="icon-btn tooltip"
+       href="/analytics/${url.id}/">
+       📊
+       <span class="tooltip-text">Analytics</span>
+    </a>
+
+  </div>
+
+
     `;
 
     urlContainer.appendChild(card);

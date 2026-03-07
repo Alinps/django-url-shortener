@@ -1,4 +1,15 @@
+/* body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+} */
 
+.page {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 /* PASSWORD TOGGLE */
 .password-wrapper {
@@ -41,12 +52,12 @@
 
 
 /* CENTERING */
-.page {
+/* .page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-}
+} */
 
 /* CARD */
 .login-card {
